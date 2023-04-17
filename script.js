@@ -9,14 +9,15 @@ canvas.height = window.innerHeight
 const healthbarPlayer1 = document.getElementById("player1-hp")
 const healthbarPlayer2 = document.getElementById("player2-hp")
 const gameTimer = document.getElementById("game-timer")
+const gameOverScreen = document.getElementById("game-over")
 
 // GAMEPLAY / CANVAS --------------------------------------------------------------------
 
-let gameTime = 6000
+let gameTime = 100
 let gameOver = false
 
 class Sprite{
-    constructor(x, y, imageSrc, framesHold, scale = 1, frameAmount = 1, offset = {x: 0, y: 0}, sprites){
+    constructor(x, y, imageSrc, framesHold, scale = 1, frameAmount = 1, offset = {x: 0, y: 0}){
         this.x = x
         this.y = y
         this.image = new Image()
@@ -211,7 +212,7 @@ class player extends Sprite{
         }
     }
     changeSprite(sprite){
-        if(this.image.src != sprite.image.src && this.isAttacking == false && this.isBlocking == false){
+        if(this.image.src != sprite.image.src && this.isAttacking == false && this.isBlocking == false && gameOver == false){
             this.frameCurrent = 0
             this.frameAmount = sprite.frameAmount
             this.framesHold = sprite.framesHold
@@ -225,7 +226,7 @@ class player extends Sprite{
             this.attackBox.y = this.y + this.attackBox.yOffset
         }
 
-        // this.drawHitboxes()
+        this.drawHitboxes()
         this.draw()
         this.animateFrames()
 
@@ -264,8 +265,8 @@ class player extends Sprite{
 }
 
 let player1 = new player(
-    90, 150, 300, 100, 
-    "d", "a", "w", "s", " ", "q", false, "images/stabby-pete-idle.png", 20, 5, 3, {x: 105, y: 91}, 
+    90, 150, 200, 100, 
+    "d", "a", "w", "s", " ", "q", false, "images/stabby-pete-idle.png", 20, 5, 3, {x: 115, y: 91}, 
     {
         idle: {imageSrc: "images/stabby-pete-idle.png", frameAmount: 3, framesHold: 20},
         idleFlip: {imageSrc: "images/stabby-pete-idle-flip.png", frameAmount: 3, framesHold: 20},
@@ -284,8 +285,8 @@ let player1 = new player(
     }
     )
 let player2 = new player(
-    90, 150, 800, 100,  
-    "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "j", "k", true, "images/stabby-pete-idle-flip.png", 10, 5, 3, {x: 125, y: 91},
+    90, 150, canvas.width - 200 - 90, 100,  
+    "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "j", "k", true, "images/stabby-pete-idle-flip.png", 10, 5, 3, {x: 115, y: 91},
     {
         idle: {imageSrc: "images/stabby-pete-idle.png", frameAmount: 3, framesHold: 20},
         idleFlip: {imageSrc: "images/stabby-pete-idle-flip.png", frameAmount: 3, framesHold: 20},
@@ -310,18 +311,20 @@ function gameLoop(){
 
     updateUI()
 
-    checkPlayerCrossed()
-    checkCollisionIfAttacking()
+    if(gameOver == false){
+        checkPlayerCrossed()
+        checkCollisionIfAttacking()
+        
+        storeKeyboardInputs()
     
-    storeKeyboardInputs()
-
-    if(player1.canMove == true){
-        playerMovement(player1)
-        playerAttacks(player1) 
-    }
-    if(player2.canMove == true){
-        playerMovement(player2)
-        playerAttacks(player2) 
+        if(player1.canMove == true){
+            playerMovement(player1)
+            playerAttacks(player1) 
+        }
+        if(player2.canMove == true){
+            playerMovement(player2)
+            playerAttacks(player2) 
+        }
     }
 
     player1.update()
@@ -369,12 +372,12 @@ function playerMovement(player){
         player.changeAnimation(player.sprites.idle, player.sprites.idleFlip)
     }
 
-    // //Check if jumping to change animation
-    // if(player.speedY < 0){ 
-    //     player.changeAnimation(player.sprites.jump, player.sprites.jumpFlip)
-    // } else if (player.speedY > 0){
-    //     player.changeAnimation(player.sprites.jumpFlip, player.sprites.jump)
-    // }
+    //Check if jumping to change animation
+    if(player.speedY < 0){ 
+        player.changeAnimation(player.sprites.jump, player.sprites.jumpFlip)
+    } else if (player.speedY > 0){
+        player.changeAnimation(player.sprites.jumpFlip, player.sprites.jump)
+    }
     
 
     // Jump
@@ -487,21 +490,30 @@ function checkGameOver(){
     if(gameOver == false)
         if(gameTime <= 0 || player1.health <= 0 || player2.health <= 0){
 
-            gameOver = true
+            player1.isAttacking = false
+            player2.isAttacking = false
+
             clearInterval(IDgameTimer)
 
             player1.canMove = false
             player2.canMove = false
 
             if(gameTime <= 0){
-                console.log("draw")   
+                player1.changeAnimation(player1.sprites.jump, player1.sprites.jumpFlip)
+                player2.changeAnimation(player2.sprites.jump, player2.sprites.jumpFlip)
+                gameOverText("draw")
             }else if(player1.health <= 0){
+                player1.changeAnimation(player1.sprites.idle, player1.sprites.idleFlip)
+                player2.changeAnimation(player2.sprites.jump, player2.sprites.jumpFlip)
                 player1.health = 0
-                console.log("Player 2 wins")
+                gameOverText("Player 2 wins")
             }else if(player2.health <= 0){
+                player1.changeAnimation(player1.sprites.jump, player1.sprites.jumpFlip)
+                player2.changeAnimation(player2.sprites.idle, player2.sprites.idleFlip)
                 player2.health = 0
-                console.log("player 1 wins")
+                gameOverText("player 1 wins")
             }
+            gameOver = true
         }
 }
 
@@ -517,28 +529,30 @@ document.addEventListener("keydown", function(event){
 })
 
 function checkKeyDown(event, player){
-    switch (event.key){
-        case player.keys.right.key:
-            player.keys.right.isPressed = true
-            player.lastKey = player.keys.right.key
-            break
-        case player.keys.left.key:
-            player.keys.left.isPressed = true
-            player.lastKey = player.keys.left.key
-            break
-        case player.keys.up.key:
-            player.keys.up.isPressed = true
-            break
-        case player.keys.attack.key:
-            player.keys.attack.isPressed = true
-            break
-        case player.keys.down.key:
-            player.keys.down.isPressed = true
-            break
-        case player.keys.block.key:
-            player.keys.block.isPressed = true
-            break
-        }
+    if(gameOver == false){
+        switch (event.key){
+            case player.keys.right.key:
+                player.keys.right.isPressed = true
+                player.lastKey = player.keys.right.key
+                break
+            case player.keys.left.key:
+                player.keys.left.isPressed = true
+                player.lastKey = player.keys.left.key
+                break
+            case player.keys.up.key:
+                player.keys.up.isPressed = true
+                break
+            case player.keys.attack.key:
+                player.keys.attack.isPressed = true
+                break
+            case player.keys.down.key:
+                player.keys.down.isPressed = true
+                break
+            case player.keys.block.key:
+                player.keys.block.isPressed = true
+                break
+            }
+    }
 }
 
 document.addEventListener("keyup", function(event){
@@ -547,25 +561,27 @@ document.addEventListener("keyup", function(event){
 })
 
 function checkKeyUp(event, player){
-    switch (event.key){
-        case player.keys.right.key:
-            player.keys.right.isPressed = false
-            break
-        case player.keys.left.key:
-            player.keys.left.isPressed = false
-            break
-        case player.keys.up.key:
-            player.keys.up.isPressed = false
-            break
-        case player.keys.attack.key:
-            player.keys.attack.isPressed = false
-            break
-        case player.keys.down.key:
-            player.keys.down.isPressed = false
-            break
-        case player.keys.block.key:
-            player.keys.block.isPressed = false
-            break
+    if(gameOver == false){
+        switch (event.key){
+            case player.keys.right.key:
+                player.keys.right.isPressed = false
+                break
+            case player.keys.left.key:
+                player.keys.left.isPressed = false
+                break
+            case player.keys.up.key:
+                player.keys.up.isPressed = false
+                break
+            case player.keys.attack.key:
+                player.keys.attack.isPressed = false
+                break
+            case player.keys.down.key:
+                player.keys.down.isPressed = false
+                break
+            case player.keys.block.key:
+                player.keys.block.isPressed = false
+                break
+        }
     }
 }
 
@@ -575,4 +591,8 @@ function updateUI(){
     healthbarPlayer1.innerHTML = player1.health
     healthbarPlayer2.innerHTML = player2.health
     gameTimer.innerHTML = gameTime
+}
+
+function gameOverText(text){
+    gameOverScreen.innerHTML = text
 }
