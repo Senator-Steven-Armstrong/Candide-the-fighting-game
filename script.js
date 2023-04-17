@@ -144,7 +144,7 @@ class player extends Sprite{
     }
     attackJumpLow(){
         this.damage = 50
-        this.changeAnimation(this.sprites.atkJLow, this.atkJLowFlip)
+        this.changeAnimation(this.sprites.atkJLow, this.sprites.atkJLowFlip)
         if(this.isFlipped == false){
             this.attack(this, -40, this.height/2, 200, 80, 10, 10, 0)
         }else{
@@ -376,7 +376,7 @@ function playerMovement(player){
     if(player.speedY < 0){ 
         player.changeAnimation(player.sprites.jump, player.sprites.jumpFlip)
     } else if (player.speedY > 0){
-        player.changeAnimation(player.sprites.jumpFlip, player.sprites.jump)
+        player.changeAnimation(player.sprites.jump, player.sprites.jumpFlip)
     }
     
 
