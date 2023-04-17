@@ -192,6 +192,7 @@ class player extends Sprite{
     }
     block(player){
         if(player.canBlock == true){
+            this.changeAnimation(this.sprites.block, this.sprites.blockFlip)
             player.isBlocking = true
             player.canBlock = false
             player.canMove = false
@@ -226,7 +227,7 @@ class player extends Sprite{
             this.attackBox.y = this.y + this.attackBox.yOffset
         }
 
-        this.drawHitboxes()
+        // this.drawHitboxes()
         this.draw()
         this.animateFrames()
 
@@ -266,7 +267,7 @@ class player extends Sprite{
 
 let player1 = new player(
     90, 150, 200, 100, 
-    "d", "a", "w", "s", " ", "q", false, "images/stabby-pete-idle.png", 20, 5, 3, {x: 115, y: 91}, 
+    "d", "a", "w", "s", " ", "e", false, "images/stabby-pete-idle.png", 20, 5, 3, {x: 115, y: 91}, 
     {
         idle: {imageSrc: "images/stabby-pete-idle.png", frameAmount: 3, framesHold: 20},
         idleFlip: {imageSrc: "images/stabby-pete-idle-flip.png", frameAmount: 3, framesHold: 20},
@@ -282,6 +283,10 @@ let player1 = new player(
         atkJLowFlip: {imageSrc: "images/sp-j-low-flip.png", frameAmount: 5, framesHold: 6},
         atkUpcut: {imageSrc: "images/sp-upcut.png", frameAmount: 8, framesHold: 6},
         atkUpcutFlip: {imageSrc: "images/sp-upcut-flip.png", frameAmount: 8, framesHold: 6},
+        block: {imageSrc: "images/sp-block.png", frameAmount: 1, framesHold: 60},
+        blockFlip: {imageSrc: "images/sp-block-flip.png", frameAmount: 1, framesHold: 60},
+        fall: {imageSrc: "images/sp-fall.png", frameAmount: 2, framesHold: 5},
+        fallFlip: {imageSrc: "images/sp-fall-flip.png", frameAmount: 2, framesHold: 5},
     }
     )
 let player2 = new player(
@@ -302,6 +307,10 @@ let player2 = new player(
         atkJLowFlip: {imageSrc: "images/sp-j-low-flip.png", frameAmount: 5, framesHold: 6},
         atkUpcut: {imageSrc: "images/sp-upcut.png", frameAmount: 8, framesHold: 6},
         atkUpcutFlip: {imageSrc: "images/sp-upcut-flip.png", frameAmount: 8, framesHold: 6},
+        block: {imageSrc: "images/sp-block.png", frameAmount: 1, framesHold: 60},
+        blockFlip: {imageSrc: "images/sp-block-flip.png", frameAmount: 1, framesHold: 60},
+        fall: {imageSrc: "images/sp-fall.png", frameAmount: 2, framesHold: 3},
+        fallFlip: {imageSrc: "images/sp-fall-flip.png", frameAmount: 2, framesHold: 3},
     }
     )
 
@@ -376,7 +385,7 @@ function playerMovement(player){
     if(player.speedY < 0){ 
         player.changeAnimation(player.sprites.jump, player.sprites.jumpFlip)
     } else if (player.speedY > 0){
-        player.changeAnimation(player.sprites.jump, player.sprites.jumpFlip)
+        player.changeAnimation(player.sprites.fall, player.sprites.fallFlip)
     }
     
 
@@ -421,6 +430,7 @@ function hitEnemy(playerAttacking, enemyHit){
         }  
         enemyHit.speedY += playerAttacking.attackForceY
     }
+    moveHealthBar(enemyHit)
     
 }
 
@@ -588,11 +598,29 @@ function checkKeyUp(event, player){
 // UI / HTML ----------------------------------------------------------------------------
 
 function updateUI(){
-    healthbarPlayer1.innerHTML = player1.health
-    healthbarPlayer2.innerHTML = player2.health
     gameTimer.innerHTML = gameTime
 }
 
 function gameOverText(text){
     gameOverScreen.innerHTML = text
+}
+
+function moveHealthBar(enemyHit){
+    //Player max hp will by default be 1000
+    procent = (1000 - enemyHit.health)/1000
+    moveAmountPlayer1 = returnProcentage(procent)
+    moveAmountPlayer2 = returnProcentage(-procent)
+    if(enemyHit == player1){
+        console.log("hit player 1")
+        healthbarPlayer1.style.marginLeft = moveAmountPlayer1
+    }else if(enemyHit == player2){
+        console.log("hit player 2")
+        healthbarPlayer2.style.marginLeft = moveAmountPlayer2
+    }
+}
+
+function returnProcentage(num){
+    procentage = num*100
+    string = procentage.toString() + "%"
+    return string
 }
