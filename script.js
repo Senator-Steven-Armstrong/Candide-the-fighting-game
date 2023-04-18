@@ -28,7 +28,6 @@ class Sprite{
         this.framesPassed = 0
         this.framesHold = framesHold
         this.offset = offset
-        
     }
 
     animateFrames(){
@@ -236,7 +235,7 @@ class Player extends Sprite{
             this.attackBox.y = this.y + this.attackBox.yOffset
         }
 
-        this.drawHitboxes()
+        // this.drawHitboxes()
         this.draw()
         this.animateFrames()
 
@@ -273,19 +272,17 @@ class Player extends Sprite{
 
 class PlayerPete extends Player{
 
-    constructor(x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped, imageSrc){
-        
-        super(x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped)
-        
-        this.width = 150
-        this.height = 90
-        this.framesHold = 20
-        this.scale = 5
-        this.frameAmount = 3
-        this.offset = {x: 115, y: 91}
-        this.image.src = imageSrc
+    constructor(x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped){
 
-        this.sprites = {
+        let width = 90
+        let height = 150
+        let framesHold = 20
+        let scale = 5
+        let frameAmount = 3
+        let offset = {x: 115, y: 91}
+        let imageSrc = "images/stabby pete/stabby-pete-idle.png"
+        
+        let sprites = {
             idle: {imageSrc: "images/stabby pete/stabby-pete-idle.png", frameAmount: 3, framesHold: 20},
             idleFlip: {imageSrc: "images/stabby pete/stabby-pete-idle-flip.png", frameAmount: 3, framesHold: 20},
             run: {imageSrc: "images/stabby pete/sp-walk.png", frameAmount: 2, framesHold: 6},
@@ -308,11 +305,8 @@ class PlayerPete extends Player{
             hitFlip: {imageSrc: "images/stabby pete/sp-hit-flip.png", frameAmount: 1, framesHold: 60},
             win: {imageSrc: "images/stabby pete/sp-buss-it.png", frameAmount: 10, framesHold: 2}
         }
-        
-        for (const sprite in this.sprites){
-            this.sprites[sprite].image = new Image()
-            this.sprites[sprite].image.src = this.sprites[sprite].imageSrc
-        }
+
+        super(width, height, x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped, imageSrc, framesHold, scale, frameAmount, offset, sprites)
     }
 
     attackMid(){
