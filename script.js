@@ -75,7 +75,6 @@ class player extends Sprite{
     this.gravity = 0.4
     this.isAttacking = false
     this.isBlocking = false
-    this.canBlock = true
     this.isFlipped = isFlipped
     this.isHit = false
     this.canMove = true
@@ -190,20 +189,65 @@ class player extends Sprite{
         }, (1000*delayFrames)/60, player)
         setTimeout(this.resetAttackBox, (1000*(durationFrames+delayFrames))/60, player, enemy)    
     }
-    block(player){
-        if(player.canBlock == true){
+    movement(){
+        // Left and right
+        if (this.keys.left.isPressed == true && this.lastKey == this.keys.left.key && this.x > 0){
+            this.speedX = -6
+            if (this.speedY == 0)
+            this.changeAnimation(this.sprites.run, this.sprites.runFlip)
+        }
+        else if (this.keys.right.isPressed == true && this.lastKey == this.keys.right.key && this.x + this.width < canvas.width){
+            this.speedX = 6
+            if (this.speedY == 0)
+            this.changeAnimation(this.sprites.run, this.sprites.runFlip)
+        } else {
+            this.speedX = 0
+            this.changeAnimation(this.sprites.idle, this.sprites.idleFlip)
+        }
+
+        //Check if jumping to change animation
+        if(this.speedY < 0){ 
+            this.changeAnimation(this.sprites.jump, this.sprites.jumpFlip)
+        } else if (this.speedY > 0){
+            this.changeAnimation(this.sprites.fall, this.sprites.fallFlip)
+        }
+        
+
+        // Jump
+        if (this.keys.up.isPressed == true && this.y + this.height >= canvas.height){
+            this.speedY -= 12
+        } 
+    }
+    attacks(){
+        // Attacks
+        if(this.isAttacking == false && this.attackInputs.length != 0){
+            if(listMatchList(this.attackInputs, [this.keys.down.key, this.keys.attack.key]) == true && this.y + this.height * 1.5 <= canvas.height){
+                this.attackJumpLow()
+            }
+            else if(listMatchList(this.attackInputs, [this.keys.down.key, this.keys.attack.key]) == true){
+                this.attackLow()
+            }
+            else if(listMatchList(this.attackInputs, [this.keys.attack.key]) == true){
+                this.attackMid()
+            }
+            else if(listMatchList(this.attackInputs, [this.keys.up.key, this.keys.attack.key])){
+                this.attackJumpUppercut()
+            }
+        } 
+    
+        // Block
+        if(this.keys.block.isPressed == true){
             this.changeAnimation(this.sprites.block, this.sprites.blockFlip)
-            player.isBlocking = true
-            player.canBlock = false
-            player.canMove = false
-            setTimeout(function(){
-                player.canMove = true
-                player.isBlocking = false
-                setTimeout(function(){
-                    player.canBlock = true
-                }, 500)
-            }, (1000*(20)/60))
-        }  
+            this.isBlocking = true
+            this.canMove = false
+            this.speedX = 0
+        }
+    }
+    applyKnockback(forceX){
+        if(forceX != 0 && this.x > 0 && this.x + this.width < canvas.width){
+            this.speedX += forceX
+            this.knockbackSpeed = this.speedX
+        }
     }
     changeAnimation(sprite, spriteFlipped){
         if(this.isFlipped == false){
@@ -250,7 +294,7 @@ class player extends Sprite{
         }
 
         //Check for knockback
-        if (this.knockbackSpeed == this.speedX && this.speedX != 0){
+        if (this.knockbackSpeed == this.speedX && this.speedX != 0 || this.knockbackSpeed != 0){
             if (this.knockbackSpeed > 0){
                 this.knockbackSpeed -= 0.4
                 this.speedX -= 0.4
@@ -258,9 +302,6 @@ class player extends Sprite{
                 this.speedX += 0.4
                 this.knockbackSpeed += 0.4
             }
-        } else {
-            this.knockbackSpeed = 0
-            this.speedX = 0
         }
     }
 }
@@ -273,8 +314,8 @@ let player1 = new player(
         idleFlip: {imageSrc: "images/stabby-pete-idle-flip.png", frameAmount: 3, framesHold: 20},
         run: {imageSrc: "images/sp-walk.png", frameAmount: 2, framesHold: 6},
         runFlip: {imageSrc: "images/sp-walk-flip.png", frameAmount: 2, framesHold: 6},
-        jump: {imageSrc: "images/sp-jump.png", frameAmount: 3, framesHold: 6},
-        jumpFlip: {imageSrc: "images/sp-jump-flip.png", frameAmount: 3, framesHold: 6},
+        jump: {imageSrc: "images/sp-jump.png", frameAmount: 3, framesHold: 15},
+        jumpFlip: {imageSrc: "images/sp-jump-flip.png", frameAmount: 3, framesHold: 15},
         atkMid: {imageSrc: "images/sp-stab.png", frameAmount: 5, framesHold: 6},
         atkMidFlip: {imageSrc: "images/sp-stab-flip.png", frameAmount: 5, framesHold: 6},
         atkLow: {imageSrc: "images/sp-low-slice.png", frameAmount: 7, framesHold: 6},
@@ -287,6 +328,8 @@ let player1 = new player(
         blockFlip: {imageSrc: "images/sp-block-flip.png", frameAmount: 1, framesHold: 60},
         fall: {imageSrc: "images/sp-fall.png", frameAmount: 2, framesHold: 5},
         fallFlip: {imageSrc: "images/sp-fall-flip.png", frameAmount: 2, framesHold: 5},
+        hit: {imageSrc: "images/sp-hit.png", frameAmount: 1, framesHold: 60},
+        hitFlip: {imageSrc: "images/sp-hit-flip.png", frameAmount: 1, framesHold: 60},
     }
     )
 let player2 = new player(
@@ -297,8 +340,8 @@ let player2 = new player(
         idleFlip: {imageSrc: "images/stabby-pete-idle-flip.png", frameAmount: 3, framesHold: 20},
         run: {imageSrc: "images/sp-walk.png", frameAmount: 2, framesHold: 6},
         runFlip: {imageSrc: "images/sp-walk-flip.png", frameAmount: 2, framesHold: 6},
-        jump: {imageSrc: "images/sp-jump.png", frameAmount: 3, framesHold: 6},
-        jumpFlip: {imageSrc: "images/sp-jump-flip.png", frameAmount: 3, framesHold: 6},
+        jump: {imageSrc: "images/sp-jump.png", frameAmount: 3, framesHold: 15},
+        jumpFlip: {imageSrc: "images/sp-jump-flip.png", frameAmount: 3, framesHold: 15},
         atkMid: {imageSrc: "images/sp-stab.png", frameAmount: 5, framesHold: 6},
         atkMidFlip: {imageSrc: "images/sp-stab-flip.png", frameAmount: 5, framesHold: 6},
         atkLow: {imageSrc: "images/sp-low-slice.png", frameAmount: 7, framesHold: 6},
@@ -311,6 +354,8 @@ let player2 = new player(
         blockFlip: {imageSrc: "images/sp-block-flip.png", frameAmount: 1, framesHold: 60},
         fall: {imageSrc: "images/sp-fall.png", frameAmount: 2, framesHold: 3},
         fallFlip: {imageSrc: "images/sp-fall-flip.png", frameAmount: 2, framesHold: 3},
+        hit: {imageSrc: "images/sp-hit.png", frameAmount: 1, framesHold: 60},
+        hitFlip: {imageSrc: "images/sp-hit-flip.png", frameAmount: 1, framesHold: 60},
     }
     )
 
@@ -320,6 +365,9 @@ function gameLoop(){
 
     updateUI()
 
+    player1.update()
+    player2.update()
+
     if(gameOver == false){
         checkPlayerCrossed()
         checkCollisionIfAttacking()
@@ -327,72 +375,16 @@ function gameLoop(){
         storeKeyboardInputs()
     
         if(player1.canMove == true){
-            playerMovement(player1)
-            playerAttacks(player1) 
+            player1.movement()
+            player1.attacks() 
         }
         if(player2.canMove == true){
-            playerMovement(player2)
-            playerAttacks(player2) 
+            player2.movement()
+            player2.attacks() 
         }
     }
-
-    player1.update()
-    player2.update()
 
     checkGameOver()
-}
-
-function playerAttacks(player){
-    // Attacks
-    if(player.isAttacking == false && player.attackInputs.length != 0){
-        if(listMatchList(player.attackInputs, [player.keys.down.key, player.keys.attack.key]) == true && player.y + player.height * 1.5 <= canvas.height){
-            player.attackJumpLow()
-        }
-        else if(listMatchList(player.attackInputs, [player.keys.down.key, player.keys.attack.key]) == true){
-            player.attackLow()
-        }
-        else if(listMatchList(player.attackInputs, [player.keys.attack.key]) == true){
-            player.attackMid()
-        }
-        else if(listMatchList(player.attackInputs, [player.keys.up.key, player.keys.attack.key])){
-            player.attackJumpUppercut()
-        }
-    } 
-
-    // Block
-    if(player.keys.block.isPressed == true){
-        player.block(player)
-    }
-}
-
-function playerMovement(player){
-    // Left and right
-    if (player.keys.left.isPressed == true && player.lastKey == player.keys.left.key && player.x > 0){
-        player.speedX = -6
-        if (player.speedY == 0)
-        player.changeAnimation(player.sprites.run, player.sprites.runFlip)
-    }
-    else if (player.keys.right.isPressed == true && player.lastKey == player.keys.right.key && player.x + player.width < canvas.width){
-        player.speedX = 6
-        if (player.speedY == 0)
-        player.changeAnimation(player.sprites.run, player.sprites.runFlip)
-    } else {
-        if (player.speedY == 0)
-        player.changeAnimation(player.sprites.idle, player.sprites.idleFlip)
-    }
-
-    //Check if jumping to change animation
-    if(player.speedY < 0){ 
-        player.changeAnimation(player.sprites.jump, player.sprites.jumpFlip)
-    } else if (player.speedY > 0){
-        player.changeAnimation(player.sprites.fall, player.sprites.fallFlip)
-    }
-    
-
-    // Jump
-    if (player.keys.up.isPressed == true && player.y + player.height >= canvas.height){
-        player.speedY -= 12
-    } 
 }
 
 function checkCollisionIfAttacking(){
@@ -424,21 +416,24 @@ function hitEnemy(playerAttacking, enemyHit){
     if(enemyHit.isBlocking == false){
         enemyHit.health -= playerAttacking.damage
         if (playerAttacking.isFlipped == false){
-            applyKnockback(9, enemyHit)
+            //Apply stronger knockback to counteract the enemy's current speedX
+            if(enemyHit.speedX == 0){
+                enemyHit.applyKnockback(9)
+            }else{
+                enemyHit.applyKnockback(9 - enemyHit.speedX)
+            }
         }else{
-            applyKnockback(-9, enemyHit)
+            if(enemyHit.speedX == 0){
+                enemyHit.applyKnockback(-9)
+            }else{
+                enemyHit.applyKnockback(-9 - enemyHit.speedX)
+            }
         }  
         enemyHit.speedY += playerAttacking.attackForceY
     }
     moveHealthBar(enemyHit)
+    enemyHit.changeAnimation(enemyHit.sprites.hit, enemyHit.sprites.hitFlip)
     
-}
-
-function applyKnockback(forceX, player){
-    if(forceX != 0 && player.x > 0 && player.x + player.width < canvas.width){
-        player.speedX += forceX
-        player.knockbackSpeed = player.speedX
-    }
 }
 
 function storeKeyboardInputs(){
@@ -523,6 +518,11 @@ function checkGameOver(){
                 player2.health = 0
                 gameOverText("player 1 wins")
             }
+            player1.speedX = 0
+            player2.speedX = 0
+            player1.knockbackSpeed = 0
+            player2.knockbackSpeed = 0
+
             gameOver = true
         }
 }
@@ -590,6 +590,8 @@ function checkKeyUp(event, player){
                 break
             case player.keys.block.key:
                 player.keys.block.isPressed = false
+                player.isBlocking = false
+                player.canMove = true
                 break
         }
     }
