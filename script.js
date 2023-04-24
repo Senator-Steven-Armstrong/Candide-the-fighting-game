@@ -83,6 +83,7 @@ class Player extends Sprite{
     this.knockbackSpeed = 0
     this.lastKey = ""
     this.attackForceY = 0
+    this.attackForceX = 0
     this.frameCurrent = 0
     this.sprites = sprites
 
@@ -157,13 +158,23 @@ class Player extends Sprite{
         // Left and right
         if (this.keys.left.isPressed == true && this.lastKey == this.keys.left.key && this.x > 0){
             this.speedX = -6
-            if (this.speedY == 0)
-            this.changeAnimation(this.sprites.run, this.sprites.runFlip)
+            if (this.speedY == 0){
+                if(this.isFlipped == false)
+                this.changeAnimation(this.sprites.runBack, this.sprites.runBackFlip)
+                else
+                this.changeAnimation(this.sprites.runForward, this.sprites.runForwardFlip)
+            }
+                
         }
         else if (this.keys.right.isPressed == true && this.lastKey == this.keys.right.key && this.x + this.width < canvas.width){
             this.speedX = 6
-            if (this.speedY == 0)
-            this.changeAnimation(this.sprites.run, this.sprites.runFlip)
+            if (this.speedY == 0){
+                if(this.isFlipped == true)
+                this.changeAnimation(this.sprites.runBack, this.sprites.runBackFlip)
+                else
+                this.changeAnimation(this.sprites.runForward, this.sprites.runForwardFlip)
+            }
+            
         } else {
             this.speedX = 0
             this.changeAnimation(this.sprites.idle, this.sprites.idleFlip)
@@ -221,7 +232,8 @@ class Player extends Sprite{
         }
     }
     changeSprite(sprite){
-        if(this.image.src != sprite.image.src && this.isAttacking == false && this.isBlocking == false && gameOver == false){
+        if((this.image.src != sprite.image.src && this.isAttacking == false && this.isBlocking == false && gameOver == false) || 
+        (this.image.src != sprite.image.src && (sprite == this.sprites.block || sprite == this.sprites.blockFlip) && gameOver == false)){
             this.frameCurrent = 0
             this.frameAmount = sprite.frameAmount
             this.framesHold = sprite.framesHold
@@ -285,8 +297,10 @@ class PlayerPete extends Player{
         let sprites = {
             idle: {imageSrc: "images/stabby pete/stabby-pete-idle.png", frameAmount: 3, framesHold: 20},
             idleFlip: {imageSrc: "images/stabby pete/stabby-pete-idle-flip.png", frameAmount: 3, framesHold: 20},
-            run: {imageSrc: "images/stabby pete/sp-walk.png", frameAmount: 2, framesHold: 6},
-            runFlip: {imageSrc: "images/stabby pete/sp-walk-flip.png", frameAmount: 2, framesHold: 6},
+            runForward: {imageSrc: "images/stabby pete/sp-walk.png", frameAmount: 2, framesHold: 6},
+            runForwardFlip: {imageSrc: "images/stabby pete/sp-walk-flip.png", frameAmount: 2, framesHold: 6},
+            runBack: {imageSrc: "images/stabby pete/sp-walk.png", frameAmount: 2, framesHold: 6},
+            runBackFlip: {imageSrc: "images/stabby pete/sp-walk-flip.png", frameAmount: 2, framesHold: 6},
             jump: {imageSrc: "images/stabby pete/sp-jump.png", frameAmount: 3, framesHold: 15},
             jumpFlip: {imageSrc: "images/stabby pete/sp-jump-flip.png", frameAmount: 3, framesHold: 15},
             atkMid: {imageSrc: "images/stabby pete/sp-stab.png", frameAmount: 5, framesHold: 6},
@@ -311,15 +325,17 @@ class PlayerPete extends Player{
 
     attackMid(){
         this.damage = 80
+        this.attackForceX = 8
         this.changeAnimation(this.sprites.atkMid, this.sprites.atkMidFlip)
         if(this.isFlipped == false){
-            this.attack(this, 20, 0, 120, this.height, 10, 10, 0)
+            this.attack(this, 20, 0, 120, this.height, 10, 15, 0)
         }else{
-            this.attack(this, this.width-120-20, 0, 120, this.height, 10, 10, 0)
+            this.attack(this, this.width-120-20, 0, 120, this.height, 10, 15, 0)
         }   
     }
     attackJumpUppercut(){
         this.damage = 100
+        this.attackForceX = 7
         this.changeAnimation(this.sprites.atkUpcut, this.sprites.atkUpcutFlip)
         if(this.isFlipped == false){
             this.attack(this, 15, -20, 150, this.height + 90, 25, 25, -10)
@@ -329,6 +345,7 @@ class PlayerPete extends Player{
     }
     attackJumpLow(){
         this.damage = 50
+        this.attackForceX = 5
         this.changeAnimation(this.sprites.atkJLow, this.sprites.atkJLowFlip)
         if(this.isFlipped == false){
             this.attack(this, -40, this.height/2, 200, 80, 10, 10, 0)
@@ -338,6 +355,7 @@ class PlayerPete extends Player{
     }
     attackLow(){
         this.damage = 60
+        this.attackForceX = 10
         this.changeAnimation(this.sprites.atkLow, this.sprites.atkLowFlip)
         if(this.isFlipped == false){
             this.attack(this, -30, this.height-70, 250, 60, 10, 15, -6)
@@ -347,13 +365,96 @@ class PlayerPete extends Player{
     }
 }
 
-let player1 = new PlayerPete(200, 100, "d", "a", "w", "s", " ", "e", false, "images/stabby pete/stabby-pete-idle.png")
+class PlayerMage extends Player{
+
+    constructor(x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped){
+
+        let width = 90
+        let height = 150
+        let framesHold = 20
+        let scale = 5
+        let frameAmount = 3
+        let offset = {x: 115, y: 91}
+        let imageSrc = "images/Magical moe/idle.png"
+        
+        let sprites = {
+            idle: {imageSrc: "images/Magical moe/idle.png", frameAmount: 4, framesHold: 10},
+            idleFlip: {imageSrc: "images/Magical moe/idleFlip.png", frameAmount: 4, framesHold: 10},
+            runForward: {imageSrc: "images/Magical moe/forward.png", frameAmount: 4, framesHold: 12},
+            runForwardFlip: {imageSrc: "images/Magical moe/forwardFlip.png", frameAmount: 4, framesHold: 12},
+            runBack: {imageSrc: "images/Magical moe/back.png", frameAmount: 4, framesHold: 12},
+            runBackFlip: {imageSrc: "images/Magical moe/backFlip.png", frameAmount: 4, framesHold: 12},
+            jump: {imageSrc: "images/Magical moe/jump.png", frameAmount: 3, framesHold: 8},
+            jumpFlip: {imageSrc: "images/Magical moe/jumpFlip.png", frameAmount: 3, framesHold: 8},
+            atkMid: {imageSrc: "images/magical moe/mid.png", frameAmount: 6, framesHold: 5},
+            atkMidFlip: {imageSrc: "images/magical moe/midFlip.png", frameAmount: 6, framesHold: 5},
+            atkLow: {imageSrc: "images/Magical moe/uppercut.png", frameAmount: 9, framesHold: 4},
+            atkLowFlip: {imageSrc: "images/Magical moe/uppercutFlip.png", frameAmount: 9, framesHold: 4},
+            atkJLow: {imageSrc: "images/stabby pete/sp-j-low.png", frameAmount: 5, framesHold: 6},
+            atkJLowFlip: {imageSrc: "images/stabby pete/sp-j-low-flip.png", frameAmount: 5, framesHold: 6},
+            atkUpcut: {imageSrc: "images/magical moe/uppercut.png", frameAmount: 9, framesHold: 4},
+            atkUpcutFlip: {imageSrc: "images/magical moe/uppercutFlip.png", frameAmount: 9, framesHold: 4},
+            block: {imageSrc: "images/stabby pete/sp-block.png", frameAmount: 1, framesHold: 60},
+            blockFlip: {imageSrc: "images/stabby pete/sp-block-flip.png", frameAmount: 1, framesHold: 60},
+            fall: {imageSrc: "images/Magical moe/fall.png", frameAmount: 3, framesHold: 8},
+            fallFlip: {imageSrc: "images/Magical moe/fallFlip.png", frameAmount: 3, framesHold: 8},
+            hit: {imageSrc: "images/stabby pete/sp-hit.png", frameAmount: 1, framesHold: 60},
+            hitFlip: {imageSrc: "images/stabby pete/sp-hit-flip.png", frameAmount: 1, framesHold: 60},
+            win: {imageSrc: "images/stabby pete/sp-buss-it.png", frameAmount: 10, framesHold: 2}
+        }
+
+        super(width, height, x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped, imageSrc, framesHold, scale, frameAmount, offset, sprites)
+    }
+
+    attackMid(){
+        this.damage = 80
+        this.attackForceX = 3
+        this.changeAnimation(this.sprites.atkMid, this.sprites.atkMidFlip)
+        if(this.isFlipped == false){
+            this.attack(this, 20, -10, 180, 80, 20, 10, 0)
+        }else{
+            this.attack(this, this.width-120-20, -10, 180, 80, 20, 10, 0)
+        }   
+    }
+    attackJumpUppercut(){
+        this.damage = 100
+        this.attackForceX = 6
+        this.changeAnimation(this.sprites.atkUpcut, this.sprites.atkUpcutFlip)
+        if(this.isFlipped == false){
+            this.attack(this, 15, -20, 150, this.height + 90, 25, 25, -10)
+        }else{
+            this.attack(this, this.width-120-15, -20, 150, this.height + 90, 25, 25, -10)
+        }    
+    }
+    attackJumpLow(){
+        this.damage = 50
+        this.attackForceX = 6
+        this.changeAnimation(this.sprites.atkJLow, this.sprites.atkJLowFlip)
+        if(this.isFlipped == false){
+            this.attack(this, -40, this.height/2, 200, 80, 10, 10, 0)
+        }else{
+            this.attack(this, this.width-200+40, this.height/2, 200, 80, 10, 10, 0)
+        }    
+    }
+    attackLow(){
+        this.damage = 60
+        this.attackForceX = 6
+        this.changeAnimation(this.sprites.atkLow, this.sprites.atkLowFlip)
+        if(this.isFlipped == false){
+            this.attack(this, 0, -20, 160, 160, 16, 20, -10)
+        }else{
+            this.attack(this, this.width - 200, -20, 160, 160, 16, 20, -10)
+        } 
+    }
+}
+
+let player1 = new PlayerMage(200, 100, "d", "a", "w", "s", " ", "e", false, "images/stabby pete/stabby-pete-idle.png")
 
 let player2 = new PlayerPete(canvas.width - 290, 100,  "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "j", "k", true, "images/stabby pete/stabby-pete-idle-flip.png")
 
 function gameLoop(){
     c.clearRect(0, 0, canvas.width, canvas.height)
-    window.requestAnimationFrame(gameLoop)
+    // window.requestAnimationFrame(gameLoop)
     
     updateUI()
     
@@ -378,6 +479,8 @@ function gameLoop(){
 
     checkGameOver()
 }
+
+setInterval(gameLoop, 1000/60)
 
 function checkCollisionIfAttacking(){
     if(player1.isAttacking == true){
@@ -405,24 +508,27 @@ function detectAttackCollision(playerAttacking, enemyHit){
 function hitEnemy(playerAttacking, enemyHit){
     enemyHit.isHit = true
     enemyHit.canMove = false
-    if(enemyHit.isBlocking == false){
+    if(enemyHit.isBlocking == true){
+        enemyHit.health -= playerAttacking.damage * 0.3
+    }else{
         enemyHit.health -= playerAttacking.damage
+    }
         if (playerAttacking.isFlipped == false){
             //Apply stronger knockback to counteract the enemy's current speedX
             if(enemyHit.speedX == 0){
-                enemyHit.applyKnockback(9)
+                enemyHit.applyKnockback(playerAttacking.attackForceX)
             }else{
-                enemyHit.applyKnockback(9 - enemyHit.speedX)
+                enemyHit.applyKnockback(playerAttacking.attackForceX - enemyHit.speedX)
             }
         }else{
             if(enemyHit.speedX == 0){
-                enemyHit.applyKnockback(-9)
+                enemyHit.applyKnockback(-playerAttacking.attackForceX)
             }else{
-                enemyHit.applyKnockback(-9 - enemyHit.speedX)
+                enemyHit.applyKnockback(-playerAttacking.attackForceX - enemyHit.speedX)
             }
         }  
         enemyHit.speedY += playerAttacking.attackForceY
-    }
+    
     moveHealthBar(enemyHit)
     enemyHit.changeAnimation(enemyHit.sprites.hit, enemyHit.sprites.hitFlip)
     
