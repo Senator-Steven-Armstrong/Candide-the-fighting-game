@@ -251,7 +251,7 @@ class Player extends Sprite{
             this.attackBox.y = this.y + this.attackBox.yOffset
         }
 
-        this.drawHitboxes()
+        // this.drawHitboxes()
         this.draw()
         this.animateFrames()
 
@@ -404,10 +404,10 @@ class PlayerMage extends Player{
             atkLowFlip: {imageSrc: "images/Magical moe/uppercutFlip.png", frameAmount: 9, framesHold: 4},
             atkJLow: {imageSrc: "images/magical moe/mid.png", frameAmount: 5, framesHold: 6},
             atkJLowFlip: {imageSrc: "images/magical moe/mid.png", frameAmount: 5, framesHold: 6},
-            atkUp: {imageSrc: "images/magical moe/rockCall.png", frameAmount: 10, framesHold: 5},
-            atkUpFlip: {imageSrc: "images/magical moe/rockCallFlip.png", frameAmount: 10, framesHold: 5},
-            block: {imageSrc: "images/stabby pete/sp-block.png", frameAmount: 1, framesHold: 60},
-            blockFlip: {imageSrc: "images/stabby pete/sp-block-flip.png", frameAmount: 1, framesHold: 60},
+            atkUp: {imageSrc: "images/magical moe/rockCall.png", frameAmount: 17, framesHold: 5},
+            atkUpFlip: {imageSrc: "images/magical moe/rockCallFlip.png", frameAmount: 17, framesHold: 5},
+            block: {imageSrc: "images/Magical moe/block.png", frameAmount: 3, framesHold: 4},
+            blockFlip: {imageSrc: "images/Magical moe/blockFlip.png.png", frameAmount: 3, framesHold: 4},
             fall: {imageSrc: "images/Magical moe/fall.png", frameAmount: 3, framesHold: 8},
             fallFlip: {imageSrc: "images/Magical moe/fallFlip.png", frameAmount: 3, framesHold: 8},
             hit: {imageSrc: "images/stabby pete/sp-hit.png", frameAmount: 1, framesHold: 60},
@@ -417,9 +417,13 @@ class PlayerMage extends Player{
 
         super(width, height, x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped, imageSrc, framesHold, scale, frameAmount, offset, sprites)
 
-        this.projectile = new Projectile(-1000, -1000, "images/magical moe/rockAttack.png", 6, 4, 17, {x: 0, y: 0})
+        this.projectile = new Projectile(-1000, -1000, "images/magical moe/rockAttack.png", 5, 4, 17, {x: 0, y: 0})
     }
-
+    resetProjectile(player){
+        player.projectile.x = -1000
+        player.projectile.y = -1000
+        console.log("hit")
+    }
     attackMid(){
         this.damage = 80
         this.attackForceX = 3
@@ -427,13 +431,8 @@ class PlayerMage extends Player{
         if(this.isFlipped == false){
             this.attack(this, 20, -10, 180, 80, 20, 10, 0)
         }else{
-            this.attack(this, this.width-120-20, -10, 180, 80, 20, 10, 0)
+            this.attack(this, -120+20, -10, 180, 80, 20, 10, 0)
         }   
-    }
-    resetProjectile(player){
-        player.projectile.x = -1000
-        player.projectile.y = -1000
-        console.log("hit")
     }
     attackJumpUppercut(){
         this.damage = 100
@@ -441,7 +440,7 @@ class PlayerMage extends Player{
         this.changeAnimation(this.sprites.atkUp, this.sprites.atkUpFlip)
         this.projectile.frameCurrent = 0
         if(this.isFlipped == false){
-            this.attack(this, this.x + this.width + 100, canvas.height - this.height - 90, 150, this.height + 90, 70, 25, -12, false)
+            this.attack(this, this.x + this.width + 100, canvas.height - this.height - 90, 150, this.height + 90, 56, 25, -12, false)
             this.projectile.x = this.x + this.width + 50
             this.projectile.y = canvas.height - this.height - 90
         }else{
@@ -449,7 +448,9 @@ class PlayerMage extends Player{
             this.projectile.x = this.x - 50 - this.width
             this.projectile.y = canvas.height - this.height - 90
         }  
-        
+        // setTimeout(function(player){
+        //     player.isAttacking = false
+        // }, (1000*52)/60, this)
         setTimeout(this.resetProjectile, (1000*95)/60, this) 
     }
     attackJumpLow(){
@@ -474,7 +475,7 @@ class PlayerMage extends Player{
     }
     float(){
         if(this.speedY > 0 && this.keys.up.isPressed){
-            this.speedY = 1
+            this.speedY = 0.8
         }
     }
     individualUpdate(){
