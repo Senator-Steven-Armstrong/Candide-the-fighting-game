@@ -11,9 +11,12 @@ const healthbarPlayer2 = document.getElementById("player2-hp")
 const gameTimer = document.getElementById("game-timer")
 const gameOverScreen = document.getElementById("game-over")
 
+const iconPlayer1 = document.getElementById("player-1-icon")
+const iconPlayer2 = document.getElementById("player-2-icon")
+
 // GAMEPLAY / CANVAS --------------------------------------------------------------------
 
-let gameTime = 100
+let gameTime = 99
 let gameOver = false
 
 class Sprite{
@@ -329,6 +332,8 @@ class PlayerPete extends Player{
         }
 
         super(width, height, x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped, imageSrc, framesHold, scale, frameAmount, offset, sprites)
+
+        this.iconSrc = "images/stabby pete/icon.png"
     }
 
     attackMid(){
@@ -371,7 +376,6 @@ class PlayerPete extends Player{
             this.attack(this, this.width + 50 - 250, this.height-70, 250, 60, 10, 15, -6)
         } 
     }
-
     individualUpdate(){
 
     }
@@ -402,21 +406,22 @@ class PlayerMage extends Player{
             atkMidFlip: {imageSrc: "images/magical moe/midFlip.png", frameAmount: 6, framesHold: 5},
             atkLow: {imageSrc: "images/Magical moe/uppercut.png", frameAmount: 9, framesHold: 4},
             atkLowFlip: {imageSrc: "images/Magical moe/uppercutFlip.png", frameAmount: 9, framesHold: 4},
-            atkJLow: {imageSrc: "images/magical moe/mid.png", frameAmount: 5, framesHold: 6},
-            atkJLowFlip: {imageSrc: "images/magical moe/mid.png", frameAmount: 5, framesHold: 6},
+            atkJLow: {imageSrc: "images/Magical moe/jumpLow.png", frameAmount: 7, framesHold: 6},
+            atkJLowFlip: {imageSrc: "images/Magical moe/jumpLowFlip.png", frameAmount: 7, framesHold: 6},
             atkUp: {imageSrc: "images/magical moe/rockCall.png", frameAmount: 17, framesHold: 5},
             atkUpFlip: {imageSrc: "images/magical moe/rockCallFlip.png", frameAmount: 17, framesHold: 5},
             block: {imageSrc: "images/Magical moe/block.png", frameAmount: 3, framesHold: 4},
-            blockFlip: {imageSrc: "images/Magical moe/blockFlip.png.png", frameAmount: 3, framesHold: 4},
+            blockFlip: {imageSrc: "images/Magical moe/blockFlip.png", frameAmount: 3, framesHold: 4},
             fall: {imageSrc: "images/Magical moe/fall.png", frameAmount: 3, framesHold: 8},
             fallFlip: {imageSrc: "images/Magical moe/fallFlip.png", frameAmount: 3, framesHold: 8},
-            hit: {imageSrc: "images/stabby pete/sp-hit.png", frameAmount: 1, framesHold: 60},
-            hitFlip: {imageSrc: "images/stabby pete/sp-hit-flip.png", frameAmount: 1, framesHold: 60},
+            hit: {imageSrc: "images/Magical moe/hit.png", frameAmount: 1, framesHold: 60},
+            hitFlip: {imageSrc: "images/Magical moe/hitFlip.png", frameAmount: 1, framesHold: 60},
             win: {imageSrc: "images/stabby pete/sp-buss-it.png", frameAmount: 10, framesHold: 2}
         }
 
         super(width, height, x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped, imageSrc, framesHold, scale, frameAmount, offset, sprites)
 
+        this.iconSrc = "images/Magical Moe/icon.png"
         this.projectile = new Projectile(-1000, -1000, "images/magical moe/rockAttack.png", 5, 4, 17, {x: 0, y: 0})
     }
     resetProjectile(player){
@@ -435,7 +440,17 @@ class PlayerMage extends Player{
         }   
     }
     attackJumpUppercut(){
-        this.damage = 100
+        this.damage = 40
+        this.attackForceX = 6
+        this.changeAnimation(this.sprites.atkJLow, this.sprites.atkJLowFlip)
+        if(this.isFlipped == false){
+            this.attack(this, 0, this.height/2 - 20, 200, 90, 24, 18, 0)
+        }else{
+            this.attack(this, this.width-200, this.height/2 - 20, 200, 90, 24, 18, 0)
+        } 
+    }
+    attackJumpLow(){
+        this.damage = 200
         this.attackForceX = 0
         this.changeAnimation(this.sprites.atkUp, this.sprites.atkUpFlip)
         this.projectile.frameCurrent = 0
@@ -444,7 +459,7 @@ class PlayerMage extends Player{
             this.projectile.x = this.x + this.width + 50
             this.projectile.y = canvas.height - this.height - 90
         }else{
-            this.attack(this, this.x - 100, canvas.height - this.height - 90, 150, this.height + 90, 70, 25, -12, false)
+            this.attack(this, this.x - 100, canvas.height - this.height - 90, 150, this.height + 90, 56, 25, -12, false)
             this.projectile.x = this.x - 50 - this.width
             this.projectile.y = canvas.height - this.height - 90
         }  
@@ -453,16 +468,6 @@ class PlayerMage extends Player{
         // }, (1000*52)/60, this)
         setTimeout(this.resetProjectile, (1000*95)/60, this) 
     }
-    attackJumpLow(){
-        this.damage = 50
-        this.attackForceX = 6
-        this.changeAnimation(this.sprites.atkJLow, this.sprites.atkJLowFlip)
-        if(this.isFlipped == false){
-            this.attack(this, -40, this.height/2, 200, 80, 10, 10, 0)
-        }else{
-            this.attack(this, this.width-200+40, this.height/2, 200, 80, 10, 10, 0)
-        }    
-    }
     attackLow(){
         this.damage = 60
         this.attackForceX = 6
@@ -470,7 +475,7 @@ class PlayerMage extends Player{
         if(this.isFlipped == false){
             this.attack(this, 0, -20, 160, 160, 16, 20, -10)
         }else{
-            this.attack(this, this.width - 200, -20, 160, 160, 16, 20, -10)
+            this.attack(this, this.width - 160, -20, 160, 160, 16, 20, -10)
         } 
     }
     float(){
@@ -481,6 +486,7 @@ class PlayerMage extends Player{
     individualUpdate(){
         this.float()
     }
+     
 }
 
 class Projectile extends Sprite{
@@ -496,10 +502,20 @@ let player1 = new PlayerMage(200, 100, "d", "a", "w", "s", " ", "e", false, "ima
 
 let player2 = new PlayerPete(canvas.width - 290, 100,  "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "j", "k", true, "images/stabby pete/stabby-pete-idle-flip.png")
 
+
+function startGame(){
+    gameTime = 99
+    gameOver = false
+
+    iconPlayer1.src = player1.iconSrc
+    iconPlayer2.src = player2.iconSrc
+}
+
+startGame()
+
 function gameLoop(){
     c.clearRect(0, 0, canvas.width, canvas.height)
-    // window.requestAnimationFrame(gameLoop)
-    
+
     updateUI()
     
     player1.update()
@@ -557,7 +573,7 @@ function hitEnemy(playerAttacking, enemyHit){
     enemyHit.isHit = true
     enemyHit.canMove = false
     if(enemyHit.isBlocking == true){
-        enemyHit.health -= playerAttacking.damage * 0.3
+        enemyHit.health -= playerAttacking.damage * 0.2
     }else{
         enemyHit.health -= playerAttacking.damage
     }
