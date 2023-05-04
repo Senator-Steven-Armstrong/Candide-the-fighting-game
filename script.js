@@ -3,21 +3,33 @@
 const canvas = document.getElementById("game-area")
 const c = canvas.getContext("2d")
 
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
-
+const UIContainer = document.getElementById("UI-container")
 const healthbarPlayer1 = document.getElementById("player1-hp")
 const healthbarPlayer2 = document.getElementById("player2-hp")
 const gameTimer = document.getElementById("game-timer")
 const gameOverScreen = document.getElementById("game-over")
 
+const iconFrame1 = document.getElementById("icon-frame-1")
+const iconFrame2 = document.getElementById("icon-frame-2")
 const iconPlayer1 = document.getElementById("player-1-icon")
 const iconPlayer2 = document.getElementById("player-2-icon")
+
+const player1moeInput = document.getElementById("moe1")
+const player1peteInput = document.getElementById("pete1")
+
+const player2moeInput = document.getElementById("moe2")
+const player2peteInput = document.getElementById("pete2")
+
+const startMenu = document.getElementById("start-menu-container")
 
 // GAMEPLAY / CANVAS --------------------------------------------------------------------
 
 let gameTime = 99
 let gameOver = false
+let gameStart = false
+
+let player1;
+let player2;
 
 class Sprite{
     constructor(x, y, imageSrc, framesHold, scale = 1, frameAmount = 1, offset = {x: 0, y: 0}){
@@ -387,9 +399,9 @@ class PlayerMage extends Player{
 
         let width = 90
         let height = 150
-        let framesHold = 20
+        let framesHold = 10
         let scale = 5
-        let frameAmount = 3
+        let frameAmount = 4
         let offset = {x: 115, y: 91}
         let imageSrc = "images/Magical moe/idle.png"
         
@@ -416,7 +428,7 @@ class PlayerMage extends Player{
             fallFlip: {imageSrc: "images/Magical moe/fallFlip.png", frameAmount: 3, framesHold: 8},
             hit: {imageSrc: "images/Magical moe/hit.png", frameAmount: 1, framesHold: 60},
             hitFlip: {imageSrc: "images/Magical moe/hitFlip.png", frameAmount: 1, framesHold: 60},
-            win: {imageSrc: "images/stabby pete/sp-buss-it.png", frameAmount: 10, framesHold: 2}
+            win: {imageSrc: "images/Magical Moe/win.png", frameAmount: 27, framesHold: 4}
         }
 
         super(width, height, x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped, imageSrc, framesHold, scale, frameAmount, offset, sprites)
@@ -427,7 +439,6 @@ class PlayerMage extends Player{
     resetProjectile(player){
         player.projectile.x = -1000
         player.projectile.y = -1000
-        console.log("hit")
     }
     attackMid(){
         this.damage = 80
@@ -486,7 +497,6 @@ class PlayerMage extends Player{
     individualUpdate(){
         this.float()
     }
-     
 }
 
 class Projectile extends Sprite{
@@ -498,20 +508,51 @@ class Projectile extends Sprite{
     }
 }
 
-let player1 = new PlayerMage(200, 100, "d", "a", "w", "s", " ", "e", false, "images/stabby pete/stabby-pete-idle.png")
-
-let player2 = new PlayerPete(canvas.width - 290, 100,  "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "j", "k", true, "images/stabby pete/stabby-pete-idle-flip.png")
-
-
 function startGame(){
-    gameTime = 99
-    gameOver = false
-
-    iconPlayer1.src = player1.iconSrc
-    iconPlayer2.src = player2.iconSrc
+    console.log(player1moeInput.checked)
+    if(gameStart == false && (player1moeInput.checked || player1peteInput.checked) && (player2moeInput.checked || player2peteInput.checked)){
+        assignPlayers()
+        gameTime = 1
+        gameStart = true
+    
+        iconPlayer1.src = player1.iconSrc
+        iconPlayer2.src = player2.iconSrc
+    
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+    
+        IDgameTimer = setInterval(function(){
+            gameTime--
+        }, 1000);
+    
+        UIContainer.classList.add("showFromTop")
+        iconFrame1.classList.add("showFromLeft")
+        iconFrame2.classList.add("showFromRight")
+        startMenu.classList.add("moveUnderScreen")
+    
+        console.log(iconPlayer1.classList)
+        
+        setInterval(gameLoop, 1000/60)
+    }else{
+        console.log("false")
+    }
+    
 }
 
-startGame()
+function assignPlayers(){
+    if(player1moeInput.checked == true){
+        player1 = new PlayerMage(200, window.innerHeight - 150, "d", "a", "w", "s", " ", "e", false, "images/stabby pete/stabby-pete-idle.png")
+    }else if(player1peteInput.checked == true){
+        player1 = new PlayerPete(200, window.innerHeight - 150,  "d", "a", "w", "s", " ", "e", false, "images/stabby pete/stabby-pete-idle-flip.png")
+    }
+    
+    if(player2moeInput.checked == true){
+        player2 = new PlayerMage(window.innerWidth - 290, window.innerHeight - 150, "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "j", "k", true, "images/stabby pete/stabby-pete-idle.png")
+    }else if(player2peteInput.checked == true){
+        player2 = new PlayerPete(window.innerWidth - 290, window.innerHeight - 150,  "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "j", "k", true, "images/stabby pete/stabby-pete-idle-flip.png")
+    }
+    
+}
 
 function gameLoop(){
     c.clearRect(0, 0, canvas.width, canvas.height)
@@ -521,9 +562,20 @@ function gameLoop(){
     player1.update()
     player2.update()
 
-    player1.projectile.update()
+    try {
+        player1.projectile.update()
+    } catch (error) {
+        console.log("hit1") 
+    }
+    try {
+        player2.projectile.update()
+    } catch (error) {
+        console.log("hit2")   
+    }
+    
 
     player1.individualUpdate()
+    player2.individualUpdate()
 
     if(gameOver == false){
         checkPlayerCrossed()
@@ -543,8 +595,6 @@ function gameLoop(){
 
     checkGameOver()
 }
-
-setInterval(gameLoop, 1000/60)
 
 function checkCollisionIfAttacking(){
     if(player1.isAttacking == true){
@@ -668,17 +718,17 @@ function checkGameOver(){
             if(gameTime <= 0){
                 player1.changeAnimation(player1.sprites.win)
                 player2.changeAnimation(player2.sprites.win)
-                gameOverText("draw")
+                gameOverText("Draw")
             }else if(player1.health <= 0){
                 player1.changeAnimation(player1.sprites.idle, player1.sprites.idleFlip)
                 player2.changeAnimation(player2.sprites.win)
                 player1.health = 0
-                gameOverText("Player 2 wins")
+                gameOverText("Player 2 wins!")
             }else if(player2.health <= 0){
                 player1.changeAnimation(player1.sprites.win)
                 player2.changeAnimation(player2.sprites.idle, player2.sprites.idleFlip)
                 player2.health = 0
-                gameOverText("player 1 wins")
+                gameOverText("Player 1 wins!")
             }
             player1.speedX = 0
             player2.speedX = 0
@@ -688,12 +738,6 @@ function checkGameOver(){
             gameOver = true
         }
 }
-
-IDgameTimer = setInterval(function(){
-    gameTime--
-}, 1000);
-
-gameLoop()
 
 document.addEventListener("keydown", function(event){
     checkKeyDown(event, player1)

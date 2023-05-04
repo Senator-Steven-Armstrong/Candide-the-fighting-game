@@ -4,6 +4,7 @@ body{
     height: 0px;
     padding: 0;
     margin: 0;
+    font-family: "Press Start 2P";
 }
 
 canvas{
@@ -17,8 +18,21 @@ canvas{
     width: 100%;
     height: 100%;
     display: block;
-    margin-top: 15vh;
     z-index: 1000;
+    margin-top: -20vh;
+    transition: all 1.2s ease-out;
+}
+
+.showFromTop{
+    margin-top: 15vh !important;
+}
+
+.showFromLeft{
+    margin-left: 1vw !important;
+}
+
+.showFromRight{
+    margin-right: 1vw !important;
 }
 
 #game-timer{
@@ -33,6 +47,8 @@ canvas{
     width: 12vw;
     height: 12vw;
     border: solid black 1.5px;
+    font-weight: 100;
+    font-size: 3vw;
 }
 
 .health-bar{
@@ -75,6 +91,7 @@ div{
     flex-direction: column;
     justify-content: center;
     align-content: center;
+    /* margin-top: 1000vh; */
 }
 
 .flip{
@@ -90,18 +107,117 @@ div{
     width: 15vw;
     height: 15vw;
     overflow: hidden;
-    margin-left: 1vw;
     margin-top: -5vh;
-
     background-color: white;
+    transition: all 1s ease-out;
 }
 
-.circle:last-of-type{
+#icon-frame-1{
+    left: 0;
+    margin-left: -15vw;
+}
+
+#icon-frame-2{
     right: 0;
-    margin-right: 1vw;
+    margin-right: -15vw;
 }
 
 .circle img{
     width: 100%;
     height: 100%;
+}
+
+#start-menu-container{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+}
+
+.moveUnderScreen{
+    transform: translateY(300%);
+}
+
+button{
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    text-align: center; 
+    top: 50vh;
+
+    width: 20vw;
+    height: 10vh;
+    padding: 0;
+
+    z-index: 1001;
+    border: solid black 0px;
+}
+
+.character-select{
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 80vh;
+    width: 34vw;
+    background-color: white;
+    top: 8vh;
+}
+
+.character-select div{
+    height: 100%;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: hidden;
+}
+
+.character-select div img{
+    width: 16vw;
+    border: double black 1.5px;
+    border-radius: 10px;
+}
+
+#left{
+    left: 2vw;
+}
+
+#left div img:first-child{
+    margin-top: 0vh;
+}
+
+#right{
+    right: 2vw;
+}
+
+#right img{
+    transform: scaleX(-1);
+}
+
+input{
+    margin-top: 4vh;
+    z-index: 10000000000000;
+    height: 3vw;
+    width: 3vw;
+}
+
+h2{
+    font-size: 1vw;
+    text-align: center;
+}
+
+h1{
+    position: absolute;
+    font-size: 1.6vw;
+    text-align: center;
+    top: -7vh;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    text-decoration: underline;
 }

@@ -6,14 +6,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gaem</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P">
 </head>
 <body>
+
+    <!-- MENU -->
+
+    <div id="start-menu-container">
+        <button onclick="startGame()">Start</button>
+        <div class="character-select" id="left">
+            <h1>Player 1</h1>
+            <div>
+                <h2>Magical Moe</h2>
+                <img src="images/Magical moe/select.png" alt="moe">
+                <input type="radio" name="player1" id="moe1">
+            </div>
+            <div>
+                <h2>Stabby Pete</h2>
+                <img src="images/stabby pete/select.png" alt="pete">
+                <input type="radio" name="player1" id="pete1">
+            </div>
+        </div>
+
+        <div class="character-select" id="right">
+            <h1>Player 2</h1>
+            <div>
+                <h2>Stabby Pete</h2>
+                <img src="images/stabby pete/select.png" alt="pete">
+                <input type="radio" name="player2" id="pete2">
+            </div>
+            <div>
+                <h2>Magical Moe</h2>
+                <img src="images/Magical moe/select.png" alt="moe">
+                <input type="radio" name="player2" id="moe2">
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME -->
+
     <div id="game-over">
         <div></div>
     </div>
 
-    <div class="circle">
-        <img id="player-1-icon" class="" src="" alt="">
+    <div class="circle" id="icon-frame-1">
+        <img id="player-1-icon" src="" alt="">
     </div>
     
     <div id="UI-container">
@@ -29,7 +66,7 @@
         </div>
     </div> 
 
-    <div class="circle">
+    <div class="circle" id="icon-frame-2">
         <img id="player-2-icon" class="flip" src="" alt="">
     </div>
 
