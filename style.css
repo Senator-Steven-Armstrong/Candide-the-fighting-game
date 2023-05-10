@@ -5,6 +5,9 @@ body{
     padding: 0;
     margin: 0;
     font-family: "Press Start 2P";
+    background-image: url("images/background.png");
+    background-size: 65%;
+    background-position-y: top;
 }
 
 canvas{
@@ -24,7 +27,7 @@ canvas{
 }
 
 .showFromTop{
-    margin-top: 15vh !important;
+    margin-top: 10vh !important;
 }
 
 .showFromLeft{
@@ -33,6 +36,44 @@ canvas{
 
 .showFromRight{
     margin-right: 1vw !important;
+}
+
+.showFromBottom{
+    margin-top: 70vh !important;
+}
+
+#ai-input-2{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    right: 15vw;
+    bottom: 5vh;
+    z-index: 100000;
+}
+
+#ai-input-2 span{
+    font-size: 1.6vw;
+}
+
+#ai-2{
+    margin: 0;
+    margin-right: 2vw;
+}
+
+#ground{
+    position: absolute;
+    width: 100vw;
+    height: 20vh;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+#ground img{
+    width: 100%;
+    height: auto;
+    margin-top: 150vh;
 }
 
 #game-timer{
@@ -145,7 +186,7 @@ button{
     left: 0;
     right: 0;
     text-align: center; 
-    top: 50vh;
+    top: 75vh;
 
     width: 20vw;
     height: 10vh;
@@ -220,4 +261,16 @@ h1{
     left: 0;
     right: 0;
     text-decoration: underline;
+}
+
+#logo{
+    width: 10vw;
+    height: auto;
+    position: absolute;
+    left: 41vw;
+    top: 15vh;
+}
+
+#logo img{
+    scale: 1.5;
 }

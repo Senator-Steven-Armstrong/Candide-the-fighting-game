@@ -13,6 +13,7 @@
     <!-- MENU -->
 
     <div id="start-menu-container">
+        <div id="logo"><img src="images/logo.png" alt=""></div>
         <button onclick="startGame()">Start</button>
         <div class="character-select" id="left">
             <h1>Player 1</h1>
@@ -41,6 +42,11 @@
                 <input type="radio" name="player2" id="moe2">
             </div>
         </div>
+
+        <div id="ai-input-2">
+            <input type="checkbox" name="ai-2" id="ai-2">
+            <span> Player 2 AI</span>
+        </div>
     </div>
 
     <!-- GAME -->
@@ -68,6 +74,10 @@
 
     <div class="circle" id="icon-frame-2">
         <img id="player-2-icon" class="flip" src="" alt="">
+    </div>
+
+    <div id="ground">
+        <img id="ground-img" src="images/foreground.png" alt="">
     </div>
 
     <canvas id="game-area"></canvas>

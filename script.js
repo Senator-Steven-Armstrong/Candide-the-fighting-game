@@ -20,16 +20,47 @@ const player1peteInput = document.getElementById("pete1")
 const player2moeInput = document.getElementById("moe2")
 const player2peteInput = document.getElementById("pete2")
 
+const ground = document.getElementById("ground-img")
+
 const startMenu = document.getElementById("start-menu-container")
+
+const player2AI = document.getElementById("ai-2")
+
+
+
 
 // GAMEPLAY / CANVAS --------------------------------------------------------------------
 
-let gameTime = 99
+const floorLevel = 80
+let gameTime;
 let gameOver = false
 let gameStart = false
 
 let player1;
 let player2;
+
+let canReset = false
+
+class Audio{
+    constructor(src){
+        this.sound = document.createElement("audio")
+        this.sound.src = src
+        this.sound.setAttribute("autoplay", "autoplay")
+        this.sound.setAttribute("preload", "auto")
+        this.sound.setAttribute("controls", "none")
+        this.sound.style.display = "none"
+        document.body.appendChild(this.sound)
+    }
+
+    play(){
+        this.sound.play()
+    }
+    stop(){
+        this.sound.pause()
+    }
+}
+
+const fightMusic = new Audio("sounds/fight.mp3")
 
 class Sprite{
     constructor(x, y, imageSrc, framesHold, scale = 1, frameAmount = 1, offset = {x: 0, y: 0}){
@@ -101,6 +132,7 @@ class Player extends Sprite{
     this.attackForceX = 0
     this.frameCurrent = 0
     this.sprites = sprites
+    this.isAi = false
 
     this.keys = {
         right: {key: keyRight, isPressed: false},
@@ -208,24 +240,24 @@ class Player extends Sprite{
         
 
         // Jump
-        if (this.keys.up.isPressed == true && this.y + this.height >= canvas.height){
+        if (this.keys.up.isPressed == true && this.y + this.height >= canvas.height - floorLevel){
             this.speedY -= 12
         } 
     }
     attacks(){
         // Attacks
-        if(this.isAttacking == false && this.attackInputs.length != 0){
-            if(listMatchList(this.attackInputs, [this.keys.down.key, this.keys.attack.key]) == true && this.y + this.height * 1.5 <= canvas.height){
+        if(this.isAttacking == false){
+            if(this.keys.down.isPressed == true && this.keys.attack.isPressed == true && this.y + this.height * 1.5 <= canvas.height - floorLevel){
                 this.attackJumpLow()
             }
-            else if(listMatchList(this.attackInputs, [this.keys.down.key, this.keys.attack.key]) == true){
+            else if(this.keys.down.isPressed == true && this.keys.attack.isPressed){
                 this.attackLow()
             }
-            else if(listMatchList(this.attackInputs, [this.keys.attack.key]) == true){
-                this.attackMid()
-            }
-            else if(listMatchList(this.attackInputs, [this.keys.up.key, this.keys.attack.key])){
+            else if(this.keys.up.isPressed == true && this.keys.attack.isPressed){
                 this.attackJumpUppercut()
+            }
+            else if(this.keys.attack.isPressed){
+                this.attackMid()
             }
         } 
     
@@ -259,6 +291,35 @@ class Player extends Sprite{
             this.image = sprite.image
         }
     }
+    chooseMoveAi(player){
+        let delayTime = Math.floor(Math.random() * 500) + 1000
+    
+        //chance to attack
+        if(Math.random() < 0.7){
+            player.keys.attack.isPressed = true
+        }
+        //chance to jump
+        if(Math.random() < 0.2){
+            player.keys.up.isPressed = true
+        }
+        // chance to down
+        if(Math.random() < 0.8){
+            player.keys.down.isPressed = true
+        }
+        //chance to move left or right
+        let chosenMoveIndex = Math.floor(Math.random() * 2)
+        let movesList = [player.keys.right, player.keys.left]
+        let chosenMove = movesList[chosenMoveIndex]
+
+        chosenMove.isPressed = true
+        player.lastKey = chosenMove.key
+        setTimeout(function(){
+            chosenMove.isPressed = true
+            player.keys.attack.isPressed = false
+            player.keys.up.isPressed = false
+            player.keys.down.isPressed = false
+        }, delayTime)
+        }
     update(){
         //Check if attack hitbox should follow player
         if(this.attackBox.followPlayer == true){
@@ -278,7 +339,7 @@ class Player extends Sprite{
         this.y += this.speedY
 
         //gravity
-        if (this.y + this.height >= canvas.height){
+        if (this.y + this.height >= canvas.height - floorLevel){
             this.speedY = 0
         }else{
             this.speedY += this.gravity
@@ -340,7 +401,8 @@ class PlayerPete extends Player{
             fallFlip: {imageSrc: "images/stabby pete/sp-fall-flip.png", frameAmount: 2, framesHold: 5},
             hit: {imageSrc: "images/stabby pete/sp-hit.png", frameAmount: 1, framesHold: 60},
             hitFlip: {imageSrc: "images/stabby pete/sp-hit-flip.png", frameAmount: 1, framesHold: 60},
-            win: {imageSrc: "images/stabby pete/sp-buss-it.png", frameAmount: 10, framesHold: 2}
+            win: {imageSrc: "images/stabby pete/sp-buss-it.png", frameAmount: 10, framesHold: 2},
+            lose: {imageSrc: "images/Stabby Pete/lose.png", frameAmount: 23, framesHold: 9}
         }
 
         super(width, height, x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped, imageSrc, framesHold, scale, frameAmount, offset, sprites)
@@ -428,13 +490,14 @@ class PlayerMage extends Player{
             fallFlip: {imageSrc: "images/Magical moe/fallFlip.png", frameAmount: 3, framesHold: 8},
             hit: {imageSrc: "images/Magical moe/hit.png", frameAmount: 1, framesHold: 60},
             hitFlip: {imageSrc: "images/Magical moe/hitFlip.png", frameAmount: 1, framesHold: 60},
-            win: {imageSrc: "images/Magical Moe/win.png", frameAmount: 27, framesHold: 4}
+            win: {imageSrc: "images/Magical Moe/win.png", frameAmount: 27, framesHold: 4},
+            lose: {imageSrc: "images/Magical Moe/lose.png", frameAmount: 6, framesHold: 8}
         }
 
         super(width, height, x, y, keyRight, keyLeft, keyJump, keyDown, keyAttack, keyBlock, isFlipped, imageSrc, framesHold, scale, frameAmount, offset, sprites)
 
         this.iconSrc = "images/Magical Moe/icon.png"
-        this.projectile = new Projectile(-1000, -1000, "images/magical moe/rockAttack.png", 5, 4, 17, {x: 0, y: 0})
+        this.projectile = new Sprite(-1000, -1000, "images/magical moe/rockAttack.png", 5, 4, 17, {x: 0, y: 0})
     }
     resetProjectile(player){
         player.projectile.x = -1000
@@ -465,14 +528,13 @@ class PlayerMage extends Player{
         this.attackForceX = 0
         this.changeAnimation(this.sprites.atkUp, this.sprites.atkUpFlip)
         this.projectile.frameCurrent = 0
+        this.projectile.y = canvas.height - floorLevel - this.height - 102
         if(this.isFlipped == false){
-            this.attack(this, this.x + this.width + 100, canvas.height - this.height - 90, 150, this.height + 90, 56, 25, -12, false)
+            this.attack(this, this.x + this.width + 100, canvas.height - floorLevel - this.height - 90, 150, this.height + 90, 56, 25, -12, false)
             this.projectile.x = this.x + this.width + 50
-            this.projectile.y = canvas.height - this.height - 90
         }else{
-            this.attack(this, this.x - 100, canvas.height - this.height - 90, 150, this.height + 90, 56, 25, -12, false)
+            this.attack(this, this.x - 100, canvas.height - floorLevel - this.height - 90, 150, this.height + 90, 56, 25, -12, false)
             this.projectile.x = this.x - 50 - this.width
-            this.projectile.y = canvas.height - this.height - 90
         }  
         // setTimeout(function(player){
         //     player.isAttacking = false
@@ -499,22 +561,17 @@ class PlayerMage extends Player{
     }
 }
 
-class Projectile extends Sprite{
-    constructor(x, y, imageSrc, framesHold, scale, frameAmount, offset){
-        super(x, y, imageSrc, framesHold, scale, frameAmount, offset)
-
-        this.speedX = 0
-        this.speedY = 0
-    }
-}
-
 function startGame(){
-    console.log(player1moeInput.checked)
     if(gameStart == false && (player1moeInput.checked || player1peteInput.checked) && (player2moeInput.checked || player2peteInput.checked)){
         assignPlayers()
-        gameTime = 1
+        if(player2AI.checked){
+            player2.isAi = true
+            player2AiInterval = setInterval(player2.chooseMoveAi, 500, player2)
+        }
+        
+        gameTime = 99
         gameStart = true
-    
+
         iconPlayer1.src = player1.iconSrc
         iconPlayer2.src = player2.iconSrc
     
@@ -529,27 +586,25 @@ function startGame(){
         iconFrame1.classList.add("showFromLeft")
         iconFrame2.classList.add("showFromRight")
         startMenu.classList.add("moveUnderScreen")
+        ground.classList.add("showFromBottom")
     
-        console.log(iconPlayer1.classList)
-        
+        fightMusic.play()
+
         setInterval(gameLoop, 1000/60)
-    }else{
-        console.log("false")
     }
-    
 }
 
 function assignPlayers(){
     if(player1moeInput.checked == true){
-        player1 = new PlayerMage(200, window.innerHeight - 150, "d", "a", "w", "s", " ", "e", false, "images/stabby pete/stabby-pete-idle.png")
+        player1 = new PlayerMage(200, 100, "d", "a", "w", "s", " ", "e", false, "images/stabby pete/stabby-pete-idle.png")
     }else if(player1peteInput.checked == true){
-        player1 = new PlayerPete(200, window.innerHeight - 150,  "d", "a", "w", "s", " ", "e", false, "images/stabby pete/stabby-pete-idle-flip.png")
+        player1 = new PlayerPete(200, 100,  "d", "a", "w", "s", " ", "e", false, "images/stabby pete/stabby-pete-idle-flip.png")
     }
     
     if(player2moeInput.checked == true){
-        player2 = new PlayerMage(window.innerWidth - 290, window.innerHeight - 150, "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "j", "k", true, "images/stabby pete/stabby-pete-idle.png")
+        player2 = new PlayerMage(window.innerWidth - 290, 100, "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "j", "k", true, "images/stabby pete/stabby-pete-idle.png")
     }else if(player2peteInput.checked == true){
-        player2 = new PlayerPete(window.innerWidth - 290, window.innerHeight - 150,  "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "j", "k", true, "images/stabby pete/stabby-pete-idle-flip.png")
+        player2 = new PlayerPete(window.innerWidth - 290, 100,  "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "j", "k", true, "images/stabby pete/stabby-pete-idle-flip.png")
     }
     
 }
@@ -565,24 +620,21 @@ function gameLoop(){
     try {
         player1.projectile.update()
     } catch (error) {
-        console.log("hit1") 
+        
     }
     try {
         player2.projectile.update()
     } catch (error) {
-        console.log("hit2")   
+           
     }
     
-
     player1.individualUpdate()
     player2.individualUpdate()
 
     if(gameOver == false){
         checkPlayerCrossed()
         checkCollisionIfAttacking()
-        
-        storeKeyboardInputs()
-    
+      
         if(player1.canMove == true){
             player1.movement()
             player1.attacks() 
@@ -594,6 +646,10 @@ function gameLoop(){
     }
 
     checkGameOver()
+}
+
+function setTrueUntilDelay(input, delay){
+    
 }
 
 function checkCollisionIfAttacking(){
@@ -648,48 +704,6 @@ function hitEnemy(playerAttacking, enemyHit){
     
 }
 
-function storeKeyboardInputs(){
-    // Checks players movement and puts it in an array as a string value
-    changeInputList(player1, player1.keys.attack)
-    changeInputList(player1, player1.keys.down)
-    changeInputList(player1, player1.keys.up)
-    changeInputList(player2, player2.keys.attack)
-    changeInputList(player2, player2.keys.down)
-    changeInputList(player2, player2.keys.up)
-}
-
-function changeInputList(player, key){
-    if(key.isPressed == true && isInList(player.attackInputs, key.key) == false){
-        player.attackInputs.push(key.key)
-    }else if (key.isPressed == false && isInList(player.attackInputs, key.key) == true){
-        player.attackInputs.splice(player.attackInputs.indexOf(key.key), 1)
-    } 
-}
-
-function isInList(list, item){
-    for (let i = 0; i <= list.length; i++) {
-        if(item == list[i]){
-            return true
-        }
-    }
-    return false
-}
-
-function listMatchList(list1, list2){
-    let longerList = list1
-    let shorterList = list2
-    if(list1.length < list2.length){
-        longerList = list2 
-        shorterList = list1
-    }
-    for (let i = 0; i <= longerList.length; i++) {
-        if(isInList(shorterList, longerList[i]) == false){
-            return false
-        }
-    }
-    return true
-}
-
 function checkPlayerCrossed(){
    if(player1.x + player1.width/2 > player2.x + player2.width/2 && 
    player1.isFlipped == false && player2.isFlipped == true){
@@ -720,13 +734,13 @@ function checkGameOver(){
                 player2.changeAnimation(player2.sprites.win)
                 gameOverText("Draw")
             }else if(player1.health <= 0){
-                player1.changeAnimation(player1.sprites.idle, player1.sprites.idleFlip)
+                player1.changeAnimation(player1.sprites.lose)
                 player2.changeAnimation(player2.sprites.win)
                 player1.health = 0
                 gameOverText("Player 2 wins!")
             }else if(player2.health <= 0){
                 player1.changeAnimation(player1.sprites.win)
-                player2.changeAnimation(player2.sprites.idle, player2.sprites.idleFlip)
+                player2.changeAnimation(player2.sprites.lose)
                 player2.health = 0
                 gameOverText("Player 1 wins!")
             }
@@ -735,13 +749,27 @@ function checkGameOver(){
             player1.knockbackSpeed = 0
             player2.knockbackSpeed = 0
 
+            setTimeout(function(){
+                gameOverText("Press space to Reset")
+                canReset = true
+            }, 2500)
+
             gameOver = true
         }
 }
 
 document.addEventListener("keydown", function(event){
+    if(player1.isAi == false)
     checkKeyDown(event, player1)
+    if(player2.isAi == false)
     checkKeyDown(event, player2)
+    if(canReset == true){
+        switch(event.key){
+            case " ":
+                location.reload()
+                break
+        }
+    }
 })
 
 function checkKeyDown(event, player){
@@ -772,7 +800,9 @@ function checkKeyDown(event, player){
 }
 
 document.addEventListener("keyup", function(event){
+    if(player1.isAi == false)
     checkKeyUp(event, player1)
+    if(player2.isAi == false)
     checkKeyUp(event, player2)
 })
 
@@ -832,3 +862,5 @@ function returnProcentage(num){
     string = procentage.toString() + "%"
     return string
 }
+
+// CODE THAT RUNS INSTANTLY ON LOAD
