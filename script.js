@@ -25,9 +25,11 @@ const ground = document.getElementById("ground-img")
 const startMenu = document.getElementById("start-menu-container")
 
 const player2AI = document.getElementById("ai-2")
+const player1AI = document.getElementById("ai-1")
 
+const pressPlayMenu = document.getElementById("press-start")
 
-
+const eventText = document.getElementById("event-text")
 
 // GAMEPLAY / CANVAS --------------------------------------------------------------------
 
@@ -35,9 +37,18 @@ const floorLevel = 80
 let gameTime;
 let gameOver = false
 let gameStart = false
+let pressPlay = true
 
 let player1;
 let player2;
+
+let knockbackAmplifier = 1.5
+let movementSpeedAmplifier = 1
+let damageAmplifier = 1
+let invincibility = false
+let eventTimerdelay = 10000
+let eventDurationCoefficient = 0.4
+let lastEvent = 0
 
 let canReset = false
 
@@ -60,7 +71,8 @@ class Audio{
     }
 }
 
-const fightMusic = new Audio("sounds/fight.mp3")
+const fightMusic = new Audio("sounds/maniac.mp3")
+const introMusic = new Audio("sounds/parrot raceway.mp3")
 
 class Sprite{
     constructor(x, y, imageSrc, framesHold, scale = 1, frameAmount = 1, offset = {x: 0, y: 0}){
@@ -133,6 +145,7 @@ class Player extends Sprite{
     this.frameCurrent = 0
     this.sprites = sprites
     this.isAi = false
+    this.movementSpeed = 6
 
     this.keys = {
         right: {key: keyRight, isPressed: false},
@@ -169,8 +182,7 @@ class Player extends Sprite{
         if(this.isAttacking == true){
             c.fillRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height)
         }
-    }
-    
+    }    
     resetAttackBox(player, enemy){
         player.attackBox.followPlayer = false
         player.isAttacking = false
@@ -208,7 +220,7 @@ class Player extends Sprite{
     movement(){
         // Left and right
         if (this.keys.left.isPressed == true && this.lastKey == this.keys.left.key && this.x > 0){
-            this.speedX = -6
+            this.speedX = -this.movementSpeed * movementSpeedAmplifier
             if (this.speedY == 0){
                 if(this.isFlipped == false)
                 this.changeAnimation(this.sprites.runBack, this.sprites.runBackFlip)
@@ -218,7 +230,7 @@ class Player extends Sprite{
                 
         }
         else if (this.keys.right.isPressed == true && this.lastKey == this.keys.right.key && this.x + this.width < canvas.width){
-            this.speedX = 6
+            this.speedX = this.movementSpeed * movementSpeedAmplifier
             if (this.speedY == 0){
                 if(this.isFlipped == true)
                 this.changeAnimation(this.sprites.runBack, this.sprites.runBackFlip)
@@ -256,11 +268,11 @@ class Player extends Sprite{
             else if(this.keys.up.isPressed == true && this.keys.attack.isPressed){
                 this.attackJumpUppercut()
             }
-            else if(this.keys.attack.isPressed){
+            else if(this.keys.attack.isPressed == true){
                 this.attackMid()
-            }
+            }  
         } 
-    
+
         // Block
         if(this.keys.block.isPressed == true){
             this.changeAnimation(this.sprites.block, this.sprites.blockFlip)
@@ -270,8 +282,9 @@ class Player extends Sprite{
         }
     }
     applyKnockback(forceX){
-        if(forceX != 0 && this.x > 0 && this.x + this.width < canvas.width){
-            this.speedX += forceX
+        if(forceX * knockbackAmplifier != 0 && this.x > 0 && this.x + this.width < canvas.width){
+            console.log("ahishdsadiuhaiu")
+            this.speedX += forceX * knockbackAmplifier
             this.knockbackSpeed = this.speedX
         }
     }
@@ -292,34 +305,50 @@ class Player extends Sprite{
         }
     }
     chooseMoveAi(player){
-        let delayTime = Math.floor(Math.random() * 500) + 1000
+        //The lower the number after Math.random(), the lower the chance is
+        let delayTime = 600
     
         //chance to attack
-        if(Math.random() < 0.7){
+        if(Math.abs((player1.x + player1.width/2) - (player2.x + player1.width/2)) < 180){
+            player.movementSpeed = 5 * movementSpeedAmplifier
+            if(Math.random() < 0.9)
+            player.keys.attack.isPressed = true
+        }else if(Math.random() < 0.3){
+            player.movementSpeed = 10 * movementSpeedAmplifier
             player.keys.attack.isPressed = true
         }
+        
         //chance to jump
         if(Math.random() < 0.2){
             player.keys.up.isPressed = true
         }
         // chance to down
-        if(Math.random() < 0.8){
+        if(Math.random() < 0.3){
             player.keys.down.isPressed = true
         }
-        //chance to move left or right
-        let chosenMoveIndex = Math.floor(Math.random() * 2)
-        let movesList = [player.keys.right, player.keys.left]
-        let chosenMove = movesList[chosenMoveIndex]
 
-        chosenMove.isPressed = true
-        player.lastKey = chosenMove.key
-        setTimeout(function(){
-            chosenMove.isPressed = true
+        //chance to move left or right
+        let buffer;
+        if(player.x < canvas.width/2){
+            buffer = 0.03
+        }
+        else{
+            buffer = 0.97
+        }
+        if(Math.random() < buffer){
+            player.keys.left.isPressed = true
+            player.lastKey = player.keys.left.key
+        }else{
+            player.keys.right.isPressed = true
+            player.lastKey = player.keys.right.key
+        }
+
+        setTimeout(function(player){
             player.keys.attack.isPressed = false
             player.keys.up.isPressed = false
             player.keys.down.isPressed = false
-        }, delayTime)
-        }
+        }, delayTime, player)
+    }
     update(){
         //Check if attack hitbox should follow player
         if(this.attackBox.followPlayer == true){
@@ -478,8 +507,8 @@ class PlayerMage extends Player{
             jumpFlip: {imageSrc: "images/Magical moe/jumpFlip.png", frameAmount: 3, framesHold: 8},
             atkMid: {imageSrc: "images/magical moe/mid.png", frameAmount: 6, framesHold: 5},
             atkMidFlip: {imageSrc: "images/magical moe/midFlip.png", frameAmount: 6, framesHold: 5},
-            atkLow: {imageSrc: "images/Magical moe/uppercut.png", frameAmount: 9, framesHold: 4},
-            atkLowFlip: {imageSrc: "images/Magical moe/uppercutFlip.png", frameAmount: 9, framesHold: 4},
+            atkLow: {imageSrc: "images/Magical moe/uppercut.png", frameAmount: 9, framesHold: 5},
+            atkLowFlip: {imageSrc: "images/Magical moe/uppercutFlip.png", frameAmount: 9, framesHold: 5},
             atkJLow: {imageSrc: "images/Magical moe/jumpLow.png", frameAmount: 7, framesHold: 6},
             atkJLowFlip: {imageSrc: "images/Magical moe/jumpLowFlip.png", frameAmount: 7, framesHold: 6},
             atkUp: {imageSrc: "images/magical moe/rockCall.png", frameAmount: 17, framesHold: 5},
@@ -504,8 +533,8 @@ class PlayerMage extends Player{
         player.projectile.y = -1000
     }
     attackMid(){
-        this.damage = 80
-        this.attackForceX = 3
+        this.damage = 60
+        this.attackForceX = 7
         this.changeAnimation(this.sprites.atkMid, this.sprites.atkMidFlip)
         if(this.isFlipped == false){
             this.attack(this, 20, -10, 180, 80, 20, 10, 0)
@@ -536,19 +565,16 @@ class PlayerMage extends Player{
             this.attack(this, this.x - 100, canvas.height - floorLevel - this.height - 90, 150, this.height + 90, 56, 25, -12, false)
             this.projectile.x = this.x - 50 - this.width
         }  
-        // setTimeout(function(player){
-        //     player.isAttacking = false
-        // }, (1000*52)/60, this)
-        setTimeout(this.resetProjectile, (1000*95)/60, this) 
+        setTimeout(this.resetProjectile, (1000*81)/60, this) 
     }
     attackLow(){
         this.damage = 60
-        this.attackForceX = 6
+        this.attackForceX = 7
         this.changeAnimation(this.sprites.atkLow, this.sprites.atkLowFlip)
         if(this.isFlipped == false){
-            this.attack(this, 0, -20, 160, 160, 16, 20, -10)
+            this.attack(this, 0, -20, 160, 160, 25, 30, -10)
         }else{
-            this.attack(this, this.width - 160, -20, 160, 160, 16, 20, -10)
+            this.attack(this, this.width - 160, -20, 160, 160, 25, 30, -10)
         } 
     }
     float(){
@@ -566,7 +592,13 @@ function startGame(){
         assignPlayers()
         if(player2AI.checked){
             player2.isAi = true
+            player2.movementSpeed = 10
             player2AiInterval = setInterval(player2.chooseMoveAi, 500, player2)
+        }
+        if(player1AI.checked){
+            player1.isAi = true
+            player1.movementSpeed = 10
+            player1AiInterval = setInterval(player1.chooseMoveAi, 500, player1)
         }
         
         gameTime = 99
@@ -581,17 +613,105 @@ function startGame(){
         IDgameTimer = setInterval(function(){
             gameTime--
         }, 1000);
+
+        IDeventTimer = setInterval(gameEvents, eventTimerdelay)
     
         UIContainer.classList.add("showFromTop")
         iconFrame1.classList.add("showFromLeft")
         iconFrame2.classList.add("showFromRight")
         startMenu.classList.add("moveUnderScreen")
         ground.classList.add("showFromBottom")
+        eventText.style.display = "block"
     
+        introMusic.stop()
         fightMusic.play()
 
         setInterval(gameLoop, 1000/60)
     }
+}
+
+function gameEvents(){
+    while(true){
+        chosenEvent = Math.ceil(Math.random() * 6)
+        if(chosenEvent != lastEvent)
+        break
+    }
+    lastEvent = chosenEvent
+
+    switch(chosenEvent){
+        case 1:
+            eventKnockback()
+            break
+        case 2:
+            eventMovementSpeed()
+            break
+        case 3:
+            eventDamage()
+            break
+        case 4:
+            eventHeal()
+            break
+        case 5:
+            eventInvincible()
+            break
+        case 6:
+            eventHook()
+            break
+    }
+}
+
+function eventKnockback(){
+    changeEventText("Steroid mode!")
+    knockbackAmplifier = 2.5
+    setTimeout(function(){
+        knockbackAmplifier = 1
+        changeEventText("")
+    }, eventTimerdelay * eventDurationCoefficient)
+}
+
+function eventDamage(){
+    changeEventText("Berserker mode!")
+    damageAmplifier = 2
+    setTimeout(function(){
+        damageAmplifier = 1
+        changeEventText("")
+    }, eventTimerdelay * eventDurationCoefficient)
+}
+
+function eventMovementSpeed(){
+    changeEventText("Cocaine mode!")
+    movementSpeedAmplifier = 2.2
+    setTimeout(function(){
+        movementSpeedAmplifier = 1
+        changeEventText("")
+    }, eventTimerdelay * eventDurationCoefficient)
+}
+
+function eventHeal(){
+    changeEventText("A moment of Tranquility.")
+    damageAmplifier = -1
+    setTimeout(function(){
+        damageAmplifier = 1
+        changeEventText("")
+    }, eventTimerdelay * eventDurationCoefficient)
+}
+
+function eventInvincible(){
+    changeEventText("Holy protection!")
+    invincibility = true
+    setTimeout(function(){
+        invincibility = false
+        changeEventText("")
+    }, eventTimerdelay * eventDurationCoefficient)
+}
+
+function eventHook(){
+    changeEventText("Hook hands!")
+    knockbackAmplifier = -1.5
+    setTimeout(function(){
+        knockbackAmplifier = 1
+        changeEventText("")
+    }, eventTimerdelay * eventDurationCoefficient)
 }
 
 function assignPlayers(){
@@ -611,9 +731,9 @@ function assignPlayers(){
 
 function gameLoop(){
     c.clearRect(0, 0, canvas.width, canvas.height)
-
+  
     updateUI()
-    
+
     player1.update()
     player2.update()
 
@@ -648,10 +768,6 @@ function gameLoop(){
     checkGameOver()
 }
 
-function setTrueUntilDelay(input, delay){
-    
-}
-
 function checkCollisionIfAttacking(){
     if(player1.isAttacking == true){
         detectAttackCollision(player1, player2)
@@ -676,32 +792,44 @@ function detectAttackCollision(playerAttacking, enemyHit){
 }
 
 function hitEnemy(playerAttacking, enemyHit){
-    enemyHit.isHit = true
-    enemyHit.canMove = false
-    if(enemyHit.isBlocking == true){
-        enemyHit.health -= playerAttacking.damage * 0.2
-    }else{
-        enemyHit.health -= playerAttacking.damage
-    }
-        if (playerAttacking.isFlipped == false){
-            //Apply stronger knockback to counteract the enemy's current speedX
-            if(enemyHit.speedX == 0){
-                enemyHit.applyKnockback(playerAttacking.attackForceX)
+    if(!invincibility){
+        enemyHit.isHit = true
+        enemyHit.canMove = false
+        if(enemyHit.isBlocking == true){
+            //Checks if Tranquility mode so as not to overheal opponent
+            if(damageAmplifier < 0 && enemyHit.health - playerAttacking.damage * damageAmplifier * 0.2 >= 1000){
+                enemyHit.health = 1000
             }else{
-                enemyHit.applyKnockback(playerAttacking.attackForceX - enemyHit.speedX)
+                enemyHit.health -= playerAttacking.damage * 0.2 * damageAmplifier
             }
+            
         }else{
-            if(enemyHit.speedX == 0){
-                enemyHit.applyKnockback(-playerAttacking.attackForceX)
+            //Checks if Tranquility mode so as not to overheal opponent
+            if(damageAmplifier < 0 && enemyHit.health - playerAttacking.damage * damageAmplifier >= 1000){
+                enemyHit.health = 1000
             }else{
-                enemyHit.applyKnockback(-playerAttacking.attackForceX - enemyHit.speedX)
-            }
-        }  
-        enemyHit.speedY += playerAttacking.attackForceY
-    
-    moveHealthBar(enemyHit)
-    enemyHit.changeAnimation(enemyHit.sprites.hit, enemyHit.sprites.hitFlip)
-    
+                enemyHit.health -= playerAttacking.damage * damageAmplifier
+            }   
+        }
+            if (playerAttacking.isFlipped == false){
+                //Apply stronger knockback to counteract the enemy's current speedX
+                if(enemyHit.speedX == 0){
+                    enemyHit.applyKnockback(playerAttacking.attackForceX)
+                }else{
+                    enemyHit.applyKnockback(playerAttacking.attackForceX - enemyHit.speedX)
+                }
+            }else{
+                if(enemyHit.speedX == 0){
+                    enemyHit.applyKnockback(-playerAttacking.attackForceX)
+                }else{
+                    enemyHit.applyKnockback(-playerAttacking.attackForceX - enemyHit.speedX)
+                }
+            }  
+            enemyHit.speedY += playerAttacking.attackForceY
+        
+        moveHealthBar(enemyHit)
+        enemyHit.changeAnimation(enemyHit.sprites.hit, enemyHit.sprites.hitFlip)
+    }
 }
 
 function checkPlayerCrossed(){
@@ -725,6 +853,8 @@ function checkGameOver(){
             player2.isAttacking = false
 
             clearInterval(IDgameTimer)
+            clearInterval(IDeventTimer)
+            eventText.style.display = "none"
 
             player1.canMove = false
             player2.canMove = false
@@ -758,15 +888,35 @@ function checkGameOver(){
         }
 }
 
-document.addEventListener("keydown", function(event){
-    if(player1.isAi == false)
-    checkKeyDown(event, player1)
-    if(player2.isAi == false)
-    checkKeyDown(event, player2)
+document.addEventListener("keydown", function(event){ 
+    try {
+        if(player1.isAi == false){
+            checkKeyDown(event, player1)
+        }
+    } catch (error) {
+        console.log("Feature not a bug")
+    }
+    try {
+        if(player2.isAi == false){
+            checkKeyDown(event, player2)
+        }
+    } catch (error) {
+        console.log("Feature not a bug")
+    }
     if(canReset == true){
         switch(event.key){
             case " ":
                 location.reload()
+                break
+        }
+    }
+    if(pressPlay == true){
+        switch(event.key){
+            case " ":
+                pressPlay = false
+                startMenu.style.display = "block"
+                pressPlayMenu.style.display = "none"
+                introMusic.play()
                 break
         }
     }
@@ -863,4 +1013,7 @@ function returnProcentage(num){
     return string
 }
 
-// CODE THAT RUNS INSTANTLY ON LOAD
+function changeEventText(text){
+    eventText.innerHTML = text
+}
+
