@@ -283,7 +283,6 @@ class Player extends Sprite{
     }
     applyKnockback(forceX){
         if(forceX * knockbackAmplifier != 0 && this.x > 0 && this.x + this.width < canvas.width){
-            console.log("ahishdsadiuhaiu")
             this.speedX += forceX * knockbackAmplifier
             this.knockbackSpeed = this.speedX
         }
@@ -999,10 +998,8 @@ function moveHealthBar(enemyHit){
     moveAmountPlayer1 = returnProcentage(procent)
     moveAmountPlayer2 = returnProcentage(-procent)
     if(enemyHit == player1){
-        console.log("hit player 1")
         healthbarPlayer1.style.marginLeft = moveAmountPlayer1
     }else if(enemyHit == player2){
-        console.log("hit player 2")
         healthbarPlayer2.style.marginLeft = moveAmountPlayer2
     }
 }
