@@ -1016,4 +1016,3 @@ function returnProcentage(num){
 function changeEventText(text){
     eventText.innerHTML = text
 }
-
