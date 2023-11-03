@@ -1,321 +1,381 @@
-body{
-    overflow: hidden;
-    width: 0px;
-    height: 0px;
-    padding: 0;
-    margin: 0;
-    font-family: "Press Start 2P";
-    background-image: url("images/background.png");
-    background-size: 65%;
-    background-position-y: top;
+body {
+  overflow: hidden;
+  width: 0px;
+  height: 0px;
+  padding: 0;
+  margin: 0;
+  font-family: "Press Start 2P";
+  background-image: url("images/background.png");
+  background-size: 65%;
+  background-position-y: top;
 }
 
-canvas{
-    position: absolute;
-    overflow: hidden;
-    top: 0;
+canvas {
+  position: absolute;
+  overflow: hidden;
+  top: 0;
 }
 
-#press-start{
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    z-index: 10000909;
+#press-start {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 10000909;
 }
-#press-start h1{
-    font-size: 4vw;
-    text-decoration: none;
-    padding: 0;
-    margin-top: 49.8vh;
-}
-
-#UI-container{
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: block;
-    z-index: 1000;
-    margin-top: -20vh;
-    transition: all 1.2s ease-out; 
+#press-start h1 {
+  font-size: 4vw;
+  text-decoration: none;
+  padding: 0;
+  margin-top: 49.8vh;
 }
 
-.showFromTop{
-    margin-top: 10vh !important;
+#UI-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1000;
+  margin-top: -20vh;
+  transition: all 1.2s ease-out;
 }
 
-.showFromLeft{
-    margin-left: 1vw !important;
+.showFromTop {
+  margin-top: 10vh !important;
 }
 
-.showFromRight{
-    margin-right: 1vw !important;
+.showFromLeft {
+  margin-left: 1vw !important;
 }
 
-.showFromBottom{
-    margin-top: 70vh !important;
+.showFromRight {
+  margin-right: 1vw !important;
 }
 
-#ai-input-1{
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    left: 15vw;
-    bottom: 5vh;
-    z-index: 100000;
+.showFromBottom {
+  margin-top: 70vh !important;
 }
 
-#ai-input-1 span{
-    font-size: 1.6vw;
+#ai-input-1 {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  left: 15vw;
+  bottom: 5vh;
+  z-index: 100000;
 }
 
-#ai-1{
-    margin: 0;
-    margin-left: 2vw;
+#ai-input-1 span {
+  font-size: 1.6vw;
 }
 
-#ai-input-2{
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    right: 15vw;
-    bottom: 5vh;
-    z-index: 100000;
+#ai-1 {
+  margin: 0;
+  margin-left: 2vw;
 }
 
-#ai-input-2 span{
-    font-size: 1.6vw;
+#ai-input-2 {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  right: 15vw;
+  bottom: 5vh;
+  z-index: 100000;
 }
 
-#ai-2{
-    margin: 0;
-    margin-right: 2vw;
+#ai-input-2 span {
+  font-size: 1.6vw;
 }
 
-#ground{
-    position: absolute;
-    width: 100vw;
-    height: 20vh;
-    top: 0;
-    left: 0;
-    z-index: 0;
+#ai-2 {
+  margin: 0;
+  margin-right: 2vw;
 }
 
-#ground img{
-    width: 100%;
-    height: auto;
-    margin-top: 150vh;
+#ground {
+  position: absolute;
+  width: 100vw;
+  height: 20vh;
+  top: 0;
+  left: 0;
+  z-index: 0;
 }
 
-#game-timer{
-    position: absolute;
-    margin-left: auto;
-    margin-right: auto;
-    left: 0;
-    right: 0;
-    text-align: center;
-    z-index: 1001;
-    margin-top: -10vh;
-    width: 12vw;
-    height: 12vw;
-    border: solid black 1.5px;
-    font-weight: 100;
-    font-size: 3vw;
+#ground img {
+  width: 100%;
+  height: auto;
+  margin-top: 150vh;
 }
 
-.health-bar{
-    position: absolute;
-    height: 8vh;
-    width: 33vw;
-    background-color: red;
-    overflow: hidden;
-    border: solid black 2px;
+#game-timer {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 1001;
+  margin-top: -10vh;
+  width: 12vw;
+  height: 12vw;
+  border: solid black 1.5px;
+  font-weight: 100;
+  font-size: 3vw;
 }
 
-.health-bar div{
-    width: 100%;
-    height: 100%;
-    background-color: green;
+.health-bar {
+  position: absolute;
+  height: 8vh;
+  width: 33vw;
+  background-color: red;
+  overflow: hidden;
+  border: solid black 2px;
 }
 
-.health-bar:first-child{
-    position: absolute;
-    left: 0;
-    margin-left: 12vw;
+.health-bar div {
+  width: 100%;
+  height: 100%;
+  background-color: green;
 }
 
-.health-bar:last-child{
-    position: absolute;
-    right: 0;
-    margin-right: 12vw;
-}   
-
-div{
-    font-size: 1.8em;
+.health-bar:first-child {
+  position: absolute;
+  left: 0;
+  margin-left: 12vw;
 }
 
-#game-over{
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    text-align: center;
-    flex-direction: column;
-    justify-content: center;
-    align-content: center;
-    /* margin-top: 1000vh; */
+.health-bar:last-child {
+  position: absolute;
+  right: 0;
+  margin-right: 12vw;
 }
 
-.flip{
-    transform: scaleX(-1);
+div {
+  font-size: 1.8em;
 }
 
-.circle{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    border-radius: 50%;
-    width: 15vw;
-    height: 15vw;
-    overflow: hidden;
-    margin-top: -5vh;
-    background-color: white;
-    transition: all 1s ease-out;
+#game-over {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  text-align: center;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  /* margin-top: 1000vh; */
 }
 
-#icon-frame-1{
-    left: 0;
-    margin-left: -15vw;
+.flip {
+  transform: scaleX(-1);
 }
 
-#icon-frame-2{
-    right: 0;
-    margin-right: -15vw;
+.circle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  border-radius: 50%;
+  width: 15vw;
+  height: 15vw;
+  overflow: hidden;
+  margin-top: -5vh;
+  background-color: white;
+  transition: all 1s ease-out;
 }
 
-.circle img{
-    width: 100%;
-    height: 100%;
+#icon-frame-1 {
+  left: 0;
+  margin-left: -15vw;
 }
 
-#start-menu-container{
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-color: white;
-    display: none;
+#icon-frame-2 {
+  right: 0;
+  margin-right: -15vw;
 }
 
-.moveUnderScreen{
-    transform: translateY(300%);
+.circle img {
+  width: 100%;
+  height: 100%;
 }
 
-button{
-    position: absolute;
-    margin-left: auto;
-    margin-right: auto;
-    left: 0;
-    right: 0;
-    text-align: center; 
-    top: 75vh;
-
-    width: 20vw;
-    height: 10vh;
-    padding: 0;
-
-    z-index: 1001;
-    border: solid black 0px;
+#start-menu-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  display: none;
 }
 
-.character-select{
-    position: absolute;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    height: 80vh;
-    width: 34vw;
-    background-color: white;
-    top: 8vh;
+.moveUnderScreen {
+  transform: translateY(300%);
 }
 
-.character-select div{
-    height: 100%;
-    width: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    overflow: hidden;
+button {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+  top: 75vh;
+
+  font-family: "Press Start 2P";
+
+  width: 20vw;
+  height: 10vh;
+  padding: 0;
+
+  z-index: 1001;
+  border: solid black 0px;
+  background-color: lightgray;
 }
 
-.character-select div img{
-    width: 16vw;
-    border: double black 1.5px;
-    border-radius: 10px;
+.character-select {
+  position: absolute;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 80vh;
+  width: 34vw;
+  background-color: white;
+  top: 8vh;
 }
 
-#left{
-    left: 2vw;
+.character-select div {
+  height: 100%;
+  width: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: hidden;
 }
 
-#left div img:first-child{
-    margin-top: 0vh;
+.character-select div img {
+  width: 16vw;
+  border: double black 1.5px;
+  border-radius: 10px;
 }
 
-#right{
-    right: 2vw;
+#left {
+  left: 2vw;
 }
 
-#right img{
-    transform: scaleX(-1);
+#left div img:first-child {
+  margin-top: 0vh;
 }
 
-input{
-    margin-top: 4vh;
-    z-index: 10000000000000;
-    height: 3vw;
-    width: 3vw;
+#right {
+  right: 2vw;
 }
 
-h2{
-    font-size: 1vw;
-    text-align: center;
+#right img {
+  transform: scaleX(-1);
 }
 
-h1{
-    position: absolute;
-    font-size: 1.6vw;
-    text-align: center;
-    top: -7vh;
-    margin-left: auto;
-    margin-right: auto;
-    left: 0;
-    right: 0;
-    text-decoration: underline;
+input {
+  margin-top: 4vh;
+  z-index: 10000000000000;
+  height: 3vw;
+  width: 3vw;
 }
 
-#logo{
-    width: 10vw;
-    height: auto;
-    position: absolute;
-    left: 41vw;
-    top: 15vh;
+h2 {
+  font-size: 1vw;
+  text-align: center;
 }
 
-#logo img{
-    scale: 1.5;
+h1 {
+  position: absolute;
+  font-size: 1.6vw;
+  text-align: center;
+  top: -7vh;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-decoration: underline;
 }
 
-#event-text{
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    width: 100%;
-    margin-top: 29vh;
-    font-size: 2vw;
-    display: none;
+#logo {
+  width: 10vw;
+  height: auto;
+  position: absolute;
+  left: 41vw;
+  top: 15vh;
+}
+
+#logo img {
+  scale: 1.5;
+}
+
+#event-text {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  margin-top: 29vh;
+  font-size: 2vw;
+  display: none;
+}
+
+#white-background {
+  position: absolute;
+  z-index: -10;
+  width: 100vw;
+  height: 100vh;
+  color: white;
+  background-color: white;
+}
+
+#controls-img {
+  width: auto;
+  height: 90vh;
+  margin-left: 50vh;
+}
+
+#controls-button {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+  top: 87vh;
+
+  font-family: "Press Start 2P";
+  font-size: 1vw;
+  color: black;
+  text-decoration: none;
+
+  width: 15vw;
+  height: 5vh;
+  padding: 0;
+  padding-top: 3vh;
+
+  z-index: 1001;
+  border: solid black 0px;
+  background-color: lightgray;
+}
+
+#back-button {
+  position: absolute;
+  margin-left: 0;
+  text-align: center;
+
+  font-family: "Press Start 2P";
+  font-size: 1.2vw;
+  color: black;
+  text-decoration: none;
+
+  width: 15vw;
+  height: 5vh;
+  padding: 1vw;
+
+  border: solid black 0px;
+  background-color: lightgray;
 }
