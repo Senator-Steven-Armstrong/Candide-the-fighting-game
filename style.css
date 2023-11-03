@@ -379,3 +379,12 @@ h1 {
   border: solid black 0px;
   background-color: lightgray;
 }
+
+#disclaimer {
+  position: absolute;
+  width: 30vw;
+  height: 1vh;
+  bottom: 0;
+  left: 2vw;
+  font-size: 0.6vw;
+}

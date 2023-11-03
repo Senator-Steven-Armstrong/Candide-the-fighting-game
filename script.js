@@ -71,7 +71,7 @@ class Audio {
   }
 }
 
-const fightMusic = new Audio("sounds/maniac.mp3");
+const fightMusic = new Audio("sounds/battle.mp3");
 const introMusic = new Audio("sounds/parrot raceway.mp3");
 
 class Sprite {
@@ -644,7 +644,7 @@ class PlayerPete extends Player {
   }
 
   attackMid() {
-    this.damage = 80;
+    this.damage = 27;
     this.attackForceX = 8;
     this.changeAnimation(this.sprites.atkMid, this.sprites.atkMidFlip);
     if (this.isFlipped == false) {
@@ -654,7 +654,7 @@ class PlayerPete extends Player {
     }
   }
   attackJumpUppercut() {
-    this.damage = 100;
+    this.damage = 34;
     this.attackForceX = 7;
     this.changeAnimation(this.sprites.atkUp, this.sprites.atkUpFlip);
     if (this.isFlipped == false) {
@@ -673,7 +673,7 @@ class PlayerPete extends Player {
     }
   }
   attackJumpLow() {
-    this.damage = 50;
+    this.damage = 22;
     this.attackForceX = 5;
     this.changeAnimation(this.sprites.atkJLow, this.sprites.atkJLowFlip);
     if (this.isFlipped == false) {
@@ -692,7 +692,7 @@ class PlayerPete extends Player {
     }
   }
   attackLow() {
-    this.damage = 60;
+    this.damage = 27;
     this.attackForceX = 10;
     this.changeAnimation(this.sprites.atkLow, this.sprites.atkLowFlip);
     if (this.isFlipped == false) {
@@ -892,7 +892,7 @@ class PlayerMage extends Player {
     player.projectile.y = -1000;
   }
   attackMid() {
-    this.damage = 60;
+    this.damage = 18;
     this.attackForceX = 7;
     this.changeAnimation(this.sprites.atkMid, this.sprites.atkMidFlip);
     if (this.isFlipped == false) {
@@ -902,7 +902,7 @@ class PlayerMage extends Player {
     }
   }
   attackJumpUppercut() {
-    this.damage = 40;
+    this.damage = 22;
     this.attackForceX = 6;
     this.changeAnimation(this.sprites.atkJLow, this.sprites.atkJLowFlip);
     if (this.isFlipped == false) {
@@ -921,7 +921,7 @@ class PlayerMage extends Player {
     }
   }
   attackJumpLow() {
-    this.damage = 200;
+    this.damage = 50;
     this.attackForceX = 0;
     this.changeAnimation(this.sprites.atkUp, this.sprites.atkUpFlip);
     this.projectile.frameCurrent = 0;
@@ -956,7 +956,7 @@ class PlayerMage extends Player {
     setTimeout(this.resetProjectile, (1000 * 81) / 60, this);
   }
   attackLow() {
-    this.damage = 60;
+    this.damage = 22;
     this.attackForceX = 7;
     this.changeAnimation(this.sprites.atkLow, this.sprites.atkLowFlip);
     if (this.isFlipped == false) {
@@ -993,7 +993,7 @@ function startGame() {
       player1AiInterval = setInterval(player1.chooseMoveAi, 500, player1);
     }
 
-    gameTime = 99;
+    gameTime = 90;
     gameStart = true;
 
     iconPlayer1.src = player1.iconSrc;
